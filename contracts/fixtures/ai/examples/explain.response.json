@@ -1,0 +1,15 @@
+{
+  "request_id": "req_EXAMPLE_EXPLAIN",
+  "explanation": "The packing list states quantity as \"95 PCS\", while the commercial invoice, customs declaration agree on \"100 PCS\". The outlier is the likely error. This is a majority-vote assessment, not proof.",
+  "likely_incorrect_document_id": "doc_EXAMPLE3",
+  "suggested_value": "100 PCS",
+  "assessment_confidence": "MODERATE",
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "model": "stub",
+    "model_version": "0",
+    "prompt_version": "stub.explain.v1",
+    "latency_ms": 1
+  }
+}

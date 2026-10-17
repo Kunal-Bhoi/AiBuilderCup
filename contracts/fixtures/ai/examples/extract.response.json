@@ -1,0 +1,241 @@
+{
+  "request_id": "req_EXAMPLE_EXTRACT_doc_EXAMPLE3",
+  "document_id": "doc_EXAMPLE3",
+  "fields": [
+    {
+      "field_key": "invoice_number",
+      "raw_value": "INV-2026-0141",
+      "normalized_value": "INV20260141",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.093,
+          0.9,
+          0.112
+        ]
+      }
+    },
+    {
+      "field_key": "seller_name",
+      "raw_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.1145,
+          0.9,
+          0.1335
+        ]
+      }
+    },
+    {
+      "field_key": "buyer_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.136,
+          0.9,
+          0.155
+        ]
+      }
+    },
+    {
+      "field_key": "product_description",
+      "raw_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.1575,
+          0.9,
+          0.1765
+        ]
+      }
+    },
+    {
+      "field_key": "hs_code",
+      "raw_value": "8471.30.0100",
+      "normalized_value": "8471300100",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.179,
+          0.9,
+          0.198
+        ]
+      }
+    },
+    {
+      "field_key": "quantity",
+      "raw_value": "95 PCS",
+      "normalized_value": "95",
+      "normalized_unit": "PCS",
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.2005,
+          0.9,
+          0.2195
+        ]
+      }
+    },
+    {
+      "field_key": "quantity_uom",
+      "raw_value": "PCS",
+      "normalized_value": "PCS",
+      "normalized_unit": null,
+      "confidence": 0.9,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.2005,
+          0.9,
+          0.2195
+        ]
+      }
+    },
+    {
+      "field_key": "net_weight",
+      "raw_value": "45 kg",
+      "normalized_value": "45",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.222,
+          0.9,
+          0.241
+        ]
+      }
+    },
+    {
+      "field_key": "gross_weight",
+      "raw_value": "48 kg",
+      "normalized_value": "48",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.2435,
+          0.9,
+          0.2625
+        ]
+      }
+    },
+    {
+      "field_key": "package_count",
+      "raw_value": "10",
+      "normalized_value": "10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.265,
+          0.9,
+          0.284
+        ]
+      }
+    },
+    {
+      "field_key": "package_type",
+      "raw_value": "Cartons",
+      "normalized_value": "CTN",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.2865,
+          0.9,
+          0.3055
+        ]
+      }
+    },
+    {
+      "field_key": "marks_and_numbers",
+      "raw_value": "HTL/SG/1-10",
+      "normalized_value": "HTL/SG/1-10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.308,
+          0.9,
+          0.327
+        ]
+      }
+    },
+    {
+      "field_key": "container_numbers",
+      "raw_value": "MSKU 1234565",
+      "normalized_value": "MSKU1234565",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "provenance": {
+        "page": 1,
+        "bbox": [
+          0.085,
+          0.3295,
+          0.9,
+          0.3485
+        ]
+      }
+    }
+  ],
+  "unreadable_fields": [
+    {
+      "field_key": "consignee_name",
+      "reason": "FIELD_ABSENT"
+    },
+    {
+      "field_key": "country_of_origin",
+      "reason": "FIELD_ABSENT"
+    },
+    {
+      "field_key": "invoice_date",
+      "reason": "FIELD_ABSENT"
+    },
+    {
+      "field_key": "po_number",
+      "reason": "FIELD_ABSENT"
+    }
+  ],
+  "usage": {
+    "input_tokens": 113,
+    "output_tokens": 200,
+    "model": "stub",
+    "model_version": "0",
+    "prompt_version": "stub.extract.packing_list.v1",
+    "latency_ms": 1
+  },
+  "warnings": []
+}

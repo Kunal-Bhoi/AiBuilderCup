@@ -1,0 +1,14 @@
+.gcloudignore
+.git
+.gitignore
+.venv/
+.local/
+.pytest_cache/
+__pycache__/
+samples/out/
+tests/
+*.pyc
+.env
+# Buildpacks install from requirements.txt (regenerate with: uv export --no-dev --no-hashes --no-emit-project -o requirements.txt)
+pyproject.toml
+uv.lock

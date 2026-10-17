@@ -1,0 +1,519 @@
+{
+  "request_id": "req_EXAMPLE_RECONCILE",
+  "verdicts": [
+    {
+      "field_key": "seller_name",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "Shenzhen Brightway Electronics Co., Ltd.",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "seller_address",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "buyer_name",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "Harbourline Trading Pte Ltd",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "buyer_address",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "consignee_name",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "Harbourline Trading Pte Ltd",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "consignee_address",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "notify_party_name",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "Harbourline Trading Pte Ltd",
+          "document_ids": [
+            "doc_EXAMPLE0"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "shipper_name",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "incoterm",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "FOB",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "incoterm_place",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "currency",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "USD",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "invoice_total",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "48250.00",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "payment_terms",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "po_number",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "PO88213",
+          "document_ids": [
+            "doc_EXAMPLE1"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "invoice_number",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "INV20260141",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "invoice_date",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "2026-10-02",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "product_description",
+      "verdict": "AGREE",
+      "verdict_reason": "Wording differs but the descriptions match after canonicalisation.",
+      "value_groups": [
+        {
+          "normalized_value": "Laptop computers 14in",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "hs_code",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "8471300100",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "country_of_origin",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "CN",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "quantity",
+      "verdict": "DISAGREE",
+      "verdict_reason": "2 different values across documents.",
+      "value_groups": [
+        {
+          "normalized_value": "100",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        },
+        {
+          "normalized_value": "95",
+          "document_ids": [
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "quantity_uom",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "PCS",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "unit_price",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "482.50",
+          "document_ids": [
+            "doc_EXAMPLE1"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "line_total",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "net_weight",
+      "verdict": "DISAGREE",
+      "verdict_reason": "Values differ by 2, outside the tolerance for this field.",
+      "value_groups": [
+        {
+          "normalized_value": "47",
+          "document_ids": [
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        },
+        {
+          "normalized_value": "45",
+          "document_ids": [
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "net_weight_uom",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "gross_weight",
+      "verdict": "DISAGREE",
+      "verdict_reason": "Values differ by 2, outside the tolerance for this field.",
+      "value_groups": [
+        {
+          "normalized_value": "50",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        },
+        {
+          "normalized_value": "48",
+          "document_ids": [
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "gross_weight_uom",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "package_count",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "10",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE2",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "package_type",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "CTN",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "marks_and_numbers",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "HTL/SG/1-10",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "bl_number",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "MAEU246810357",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "bl_date",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "2026-10-05",
+          "document_ids": [
+            "doc_EXAMPLE0"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "vessel_name",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "MAERSK KOWLOON",
+          "document_ids": [
+            "doc_EXAMPLE0"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "voyage_number",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "flight_number",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "port_of_loading",
+      "verdict": "AGREE",
+      "verdict_reason": "Wording differs but the descriptions match after canonicalisation.",
+      "value_groups": [
+        {
+          "normalized_value": "Shenzhen, China",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "port_of_discharge",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "Singapore",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE1",
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "place_of_delivery",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "container_numbers",
+      "verdict": "AGREE",
+      "verdict_reason": null,
+      "value_groups": [
+        {
+          "normalized_value": "MSKU1234565",
+          "document_ids": [
+            "doc_EXAMPLE0",
+            "doc_EXAMPLE3"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "seal_numbers",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "preference_claim",
+      "verdict": "SINGLE_SOURCE",
+      "verdict_reason": "Only one document carries this field, so it was not cross-checked.",
+      "value_groups": [
+        {
+          "normalized_value": "No",
+          "document_ids": [
+            "doc_EXAMPLE2"
+          ]
+        }
+      ]
+    },
+    {
+      "field_key": "origin_criterion",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    },
+    {
+      "field_key": "certificate_number",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": "Optional in the uploaded document types and present in none.",
+      "value_groups": []
+    },
+    {
+      "field_key": "exporter_reference",
+      "verdict": "NOT_APPLICABLE",
+      "verdict_reason": null,
+      "value_groups": []
+    }
+  ],
+  "missing_documents": [],
+  "usage": null
+}

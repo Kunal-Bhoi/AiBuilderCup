@@ -1,0 +1,35 @@
+{
+  "request_id": "req_EXAMPLE_EXPLAIN",
+  "shipment_id": "shp_EXAMPLE",
+  "field_key": "quantity",
+  "verdict": "DISAGREE",
+  "values": [
+    {
+      "document_id": "doc_EXAMPLE1",
+      "doc_type": "COMMERCIAL_INVOICE",
+      "raw_value": "100 PCS",
+      "normalized_value": "100",
+      "confidence": 0.93
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "doc_type": "CUSTOMS_DECLARATION",
+      "raw_value": "100 PCS",
+      "normalized_value": "100",
+      "confidence": 0.93
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "doc_type": "PACKING_LIST",
+      "raw_value": "95 PCS",
+      "normalized_value": "95",
+      "confidence": 0.93
+    }
+  ],
+  "related_fields": [
+    {
+      "field_key": "hs_code",
+      "value": "8471300100"
+    }
+  ]
+}

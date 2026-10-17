@@ -1,0 +1,61 @@
+{
+  "request_id": "req_EXAMPLE_CLASSIFY",
+  "documents": [
+    {
+      "document_id": "doc_EXAMPLE0",
+      "filename": "bill_of_lading.pdf",
+      "page_count": 1,
+      "pages": [
+        {
+          "page": 1,
+          "image_url": "https://storage.googleapis.com/BUCKET/orgs/ORG/shipments/SHP/pages/doc_EXAMPLE0/0001.png?X-Goog-Signature=...",
+          "width_px": 1654,
+          "height_px": 2339
+        }
+      ],
+      "text_layer_excerpt": "BILL OF LADING\r\nB/L number: MAEU 246810357\r\nB/L date: 2026-10-05\r\nShipper name: Shenzhen Brightway Electronics Co., Ltd.\r\nConsignee name: Harbourline Trading Pte Ltd\r\nNotify party: Harbourline Trading Pte Ltd\r\nVessel name: MAERSK KOWLOON\r\nPort of loading: Shenzhen, China\r\nPort of discharge: Singapore\r\nProduct description: Laptop computers 14in\r\nPackage count: 10\r\nPackage type: Cartons\r\nGross weight: 50 kg\r\nMarks and numbers: HTL/SG/1-10\r\nContainer numbers: MSKU1234565\r\nSample document generated for TradeCheck testing. Not a real shipment."
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "filename": "commercial_invoice.pdf",
+      "page_count": 1,
+      "pages": [
+        {
+          "page": 1,
+          "image_url": "https://storage.googleapis.com/BUCKET/orgs/ORG/shipments/SHP/pages/doc_EXAMPLE1/0001.png?X-Goog-Signature=...",
+          "width_px": 1654,
+          "height_px": 2339
+        }
+      ],
+      "text_layer_excerpt": "COMMERCIAL INVOICE\r\nInvoice number: INV-2026-0141\r\nInvoice date: 2026-10-02\r\nSeller name: Shenzhen Brightway Electronics Co., Ltd.\r\nBuyer name: Harbourline Trading Pte Ltd\r\nConsignee name: Harbourline Trading Pte Ltd\r\nIncoterm: FOB Shenzhen\r\nCurrency: USD\r\nInvoice total: USD 48,250.00\r\nProduct description: Laptop computer 14 inch, 16GB RAM\r\nHS code: 8471.30.0100\r\nCountry of origin: China\r\nQuantity: 100 PCS\r\nUnit price: USD 482.50\r\nGross weight: 50 kg\r\nNet weight: 47 kg\r\nPort of loading: Shenzhen, China\r\nPort of discharge: Singapore\r\nPO number: PO-88213\r\nSample document generated for TradeCheck testing. Not a real shipment."
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "filename": "customs_declaration.pdf",
+      "page_count": 1,
+      "pages": [
+        {
+          "page": 1,
+          "image_url": "https://storage.googleapis.com/BUCKET/orgs/ORG/shipments/SHP/pages/doc_EXAMPLE2/0001.png?X-Goog-Signature=...",
+          "width_px": 1654,
+          "height_px": 2339
+        }
+      ],
+      "text_layer_excerpt": "CUSTOMS DECLARATION\r\nInvoice number: INV-2026-0141\r\nInvoice date: 2026-10-02\r\nSeller name: Shenzhen Brightway Electronics Co., Ltd.\r\nBuyer name: Harbourline Trading Pte Ltd\r\nConsignee name: Harbourline Trading Pte Ltd\r\nIncoterm: FOB\r\nCurrency: USD\r\nInvoice total: 48250.00\r\nProduct description: Laptop computer 14 inch, 16GB RAM\r\nHS code: 8471.30.0100\r\nCountry of origin: CN\r\nQuantity: 100 PCS\r\nNet weight: 47 kg\r\nGross weight: 50 kg\r\nPackage count: 10\r\nB/L number: MAEU246810357\r\nPort of loading: Shenzhen\r\nPort of discharge: Singapore\r\nPreference claim: No\r\nSample document generated for TradeCheck testing. Not a real shipment."
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "filename": "packing_list.pdf",
+      "page_count": 1,
+      "pages": [
+        {
+          "page": 1,
+          "image_url": "https://storage.googleapis.com/BUCKET/orgs/ORG/shipments/SHP/pages/doc_EXAMPLE3/0001.png?X-Goog-Signature=...",
+          "width_px": 1654,
+          "height_px": 2339
+        }
+      ],
+      "text_layer_excerpt": "PACKING LIST\r\nInvoice number: INV-2026-0141\r\nSeller name: Shenzhen Brightway Electronics Co., Ltd.\r\nBuyer name: Harbourline Trading Pte Ltd\r\nProduct description: Laptop computer 14 inch, 16GB RAM\r\nHS code: 8471.30.0100\r\nQuantity: 95 PCS\r\nNet weight: 45 kg\r\nGross weight: 48 kg\r\nPackage count: 10\r\nPackage type: Cartons\r\nMarks and numbers: HTL/SG/1-10\r\nContainer numbers: MSKU 1234565\r\nSample document generated for TradeCheck testing. Not a real shipment."
+    }
+  ]
+}

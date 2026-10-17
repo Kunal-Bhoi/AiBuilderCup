@@ -3,7 +3,6 @@
 import asyncio
 import json
 from collections import defaultdict
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.responses import StreamingResponse
@@ -20,7 +19,7 @@ from app.api.common import (
 )
 from app.auth import Principal, get_principal
 from app.db.engine import get_session, sessionmaker
-from app.db.models import AnalysisRun, Decision, Discrepancy, Document, ExtractedField, FieldVerdict
+from app.db.models import AnalysisRun, Decision, Discrepancy, ExtractedField, FieldVerdict
 from app.domain.enums import DocumentStatus, ShipmentStatus, Stage, Verdict
 from app.domain.fields import FIELD_GROUP_OF, FIELD_GROUPS, FIELD_LABELS, OUT_OF_SCOPE, OUT_OF_SCOPE_KEYS
 from app.domain.status import ANALYZABLE

@@ -1,0 +1,39 @@
+{
+  "request_id": "req_EXAMPLE_CLASSIFY",
+  "documents": [
+    {
+      "document_id": "doc_EXAMPLE0",
+      "doc_type": "BILL_OF_LADING",
+      "confidence": 0.97,
+      "page_ranges": null
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "doc_type": "COMMERCIAL_INVOICE",
+      "confidence": 0.97,
+      "page_ranges": null
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "doc_type": "CUSTOMS_DECLARATION",
+      "confidence": 0.97,
+      "page_ranges": null
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "doc_type": "PACKING_LIST",
+      "confidence": 0.97,
+      "page_ranges": null
+    }
+  ],
+  "duplicates": [],
+  "missing_documents": [],
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "model": "stub",
+    "model_version": "0",
+    "prompt_version": "stub.classify.v1",
+    "latency_ms": 1
+  }
+}

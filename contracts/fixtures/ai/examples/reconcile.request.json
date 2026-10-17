@@ -1,0 +1,612 @@
+{
+  "request_id": "req_EXAMPLE_RECONCILE",
+  "shipment_id": "shp_EXAMPLE",
+  "documents": [
+    {
+      "document_id": "doc_EXAMPLE0",
+      "doc_type": "BILL_OF_LADING"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "doc_type": "COMMERCIAL_INVOICE"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "doc_type": "CUSTOMS_DECLARATION"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "doc_type": "PACKING_LIST"
+    }
+  ],
+  "fields": [
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "bl_number",
+      "raw_value": "MAEU 246810357",
+      "normalized_value": "MAEU246810357",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "bl_date",
+      "raw_value": "2026-10-05",
+      "normalized_value": "2026-10-05",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "consignee_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "notify_party_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "vessel_name",
+      "raw_value": "MAERSK KOWLOON",
+      "normalized_value": "MAERSK KOWLOON",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "port_of_loading",
+      "raw_value": "Shenzhen, China",
+      "normalized_value": "Shenzhen, China",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "port_of_discharge",
+      "raw_value": "Singapore",
+      "normalized_value": "Singapore",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "product_description",
+      "raw_value": "Laptop computers 14in",
+      "normalized_value": "Laptop computers 14in",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "package_count",
+      "raw_value": "10",
+      "normalized_value": "10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "package_type",
+      "raw_value": "Cartons",
+      "normalized_value": "CTN",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "gross_weight",
+      "raw_value": "50 kg",
+      "normalized_value": "50",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "marks_and_numbers",
+      "raw_value": "HTL/SG/1-10",
+      "normalized_value": "HTL/SG/1-10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE0",
+      "field_key": "container_numbers",
+      "raw_value": "MSKU1234565",
+      "normalized_value": "MSKU1234565",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "invoice_number",
+      "raw_value": "INV-2026-0141",
+      "normalized_value": "INV20260141",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "invoice_date",
+      "raw_value": "2026-10-02",
+      "normalized_value": "2026-10-02",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "seller_name",
+      "raw_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "buyer_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "consignee_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "incoterm",
+      "raw_value": "FOB Shenzhen",
+      "normalized_value": "FOB",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "currency",
+      "raw_value": "USD",
+      "normalized_value": "USD",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "invoice_total",
+      "raw_value": "USD 48,250.00",
+      "normalized_value": "48250.00",
+      "normalized_unit": "USD",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "product_description",
+      "raw_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "hs_code",
+      "raw_value": "8471.30.0100",
+      "normalized_value": "8471300100",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "country_of_origin",
+      "raw_value": "China",
+      "normalized_value": "CN",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "quantity",
+      "raw_value": "100 PCS",
+      "normalized_value": "100",
+      "normalized_unit": "PCS",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "quantity_uom",
+      "raw_value": "PCS",
+      "normalized_value": "PCS",
+      "normalized_unit": null,
+      "confidence": 0.9,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "unit_price",
+      "raw_value": "USD 482.50",
+      "normalized_value": "482.50",
+      "normalized_unit": "USD",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "gross_weight",
+      "raw_value": "50 kg",
+      "normalized_value": "50",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "net_weight",
+      "raw_value": "47 kg",
+      "normalized_value": "47",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "port_of_loading",
+      "raw_value": "Shenzhen, China",
+      "normalized_value": "Shenzhen, China",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "port_of_discharge",
+      "raw_value": "Singapore",
+      "normalized_value": "Singapore",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE1",
+      "field_key": "po_number",
+      "raw_value": "PO-88213",
+      "normalized_value": "PO88213",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "invoice_number",
+      "raw_value": "INV-2026-0141",
+      "normalized_value": "INV20260141",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "invoice_date",
+      "raw_value": "2026-10-02",
+      "normalized_value": "2026-10-02",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "seller_name",
+      "raw_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "buyer_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "consignee_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "incoterm",
+      "raw_value": "FOB",
+      "normalized_value": "FOB",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "currency",
+      "raw_value": "USD",
+      "normalized_value": "USD",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "invoice_total",
+      "raw_value": "48250.00",
+      "normalized_value": "48250.00",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "product_description",
+      "raw_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "hs_code",
+      "raw_value": "8471.30.0100",
+      "normalized_value": "8471300100",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "country_of_origin",
+      "raw_value": "CN",
+      "normalized_value": "CN",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "quantity",
+      "raw_value": "100 PCS",
+      "normalized_value": "100",
+      "normalized_unit": "PCS",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "quantity_uom",
+      "raw_value": "PCS",
+      "normalized_value": "PCS",
+      "normalized_unit": null,
+      "confidence": 0.9,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "net_weight",
+      "raw_value": "47 kg",
+      "normalized_value": "47",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "gross_weight",
+      "raw_value": "50 kg",
+      "normalized_value": "50",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "package_count",
+      "raw_value": "10",
+      "normalized_value": "10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "bl_number",
+      "raw_value": "MAEU246810357",
+      "normalized_value": "MAEU246810357",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "port_of_loading",
+      "raw_value": "Shenzhen",
+      "normalized_value": "Shenzhen",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "port_of_discharge",
+      "raw_value": "Singapore",
+      "normalized_value": "Singapore",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE2",
+      "field_key": "preference_claim",
+      "raw_value": "No",
+      "normalized_value": "No",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "invoice_number",
+      "raw_value": "INV-2026-0141",
+      "normalized_value": "INV20260141",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "seller_name",
+      "raw_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_value": "Shenzhen Brightway Electronics Co., Ltd.",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "buyer_name",
+      "raw_value": "Harbourline Trading Pte Ltd",
+      "normalized_value": "Harbourline Trading Pte Ltd",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "product_description",
+      "raw_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_value": "Laptop computer 14 inch, 16GB RAM",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "hs_code",
+      "raw_value": "8471.30.0100",
+      "normalized_value": "8471300100",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "quantity",
+      "raw_value": "95 PCS",
+      "normalized_value": "95",
+      "normalized_unit": "PCS",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "quantity_uom",
+      "raw_value": "PCS",
+      "normalized_value": "PCS",
+      "normalized_unit": null,
+      "confidence": 0.9,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "net_weight",
+      "raw_value": "45 kg",
+      "normalized_value": "45",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "gross_weight",
+      "raw_value": "48 kg",
+      "normalized_value": "48",
+      "normalized_unit": "KG",
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "package_count",
+      "raw_value": "10",
+      "normalized_value": "10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "package_type",
+      "raw_value": "Cartons",
+      "normalized_value": "CTN",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "marks_and_numbers",
+      "raw_value": "HTL/SG/1-10",
+      "normalized_value": "HTL/SG/1-10",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    },
+    {
+      "document_id": "doc_EXAMPLE3",
+      "field_key": "container_numbers",
+      "raw_value": "MSKU 1234565",
+      "normalized_value": "MSKU1234565",
+      "normalized_unit": null,
+      "confidence": 0.93,
+      "cell_status": "PRESENT"
+    }
+  ],
+  "options": {
+    "confidence_floor": 0.55
+  }
+}

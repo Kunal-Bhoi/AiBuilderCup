@@ -1,0 +1,19 @@
+{
+  "request_id": "req_EXAMPLE_EXTRACT_doc_EXAMPLE3",
+  "document_id": "doc_EXAMPLE3",
+  "doc_type": "PACKING_LIST",
+  "pages": [
+    {
+      "page": 1,
+      "image_url": "https://storage.googleapis.com/BUCKET/orgs/ORG/shipments/SHP/pages/doc_EXAMPLE3/0001.png?X-Goog-Signature=...",
+      "width_px": 1654,
+      "height_px": 2339
+    }
+  ],
+  "text_layer": "PACKING LIST\r\nInvoice number: INV-2026-0141\r\nSeller name: Shenzhen Brightway Electronics Co., Ltd.\r\nBuyer name: Harbourline Trading Pte Ltd\r\nProduct description: Laptop computer 14 inch, 16GB RAM\r\nHS code: 8471.30.0100\r\nQuantity: 95 PCS\r\nNet weight: 45 kg\r\nGross weight: 48 kg\r\nPackage count: 10\r\nPackage type: Cartons\r\nMarks and numbers: HTL/SG/1-10\r\nContainer numbers: MSKU 1234565\r\nSample document generated for TradeCheck testing. Not a real shipment.",
+  "options": {
+    "confidence_floor": 0.55,
+    "max_pages": 15,
+    "redact": true
+  }
+}
