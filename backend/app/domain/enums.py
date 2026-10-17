@@ -1,0 +1,110 @@
+"""Canonical wire vocabulary (§4). These exact strings travel on the wire. Do not invent variants."""
+
+from enum import StrEnum
+
+
+class DocType(StrEnum):
+    COMMERCIAL_INVOICE = "COMMERCIAL_INVOICE"
+    PACKING_LIST = "PACKING_LIST"
+    BILL_OF_LADING = "BILL_OF_LADING"
+    AIR_WAYBILL = "AIR_WAYBILL"
+    CERTIFICATE_OF_ORIGIN = "CERTIFICATE_OF_ORIGIN"
+    PURCHASE_ORDER = "PURCHASE_ORDER"
+    CUSTOMS_DECLARATION = "CUSTOMS_DECLARATION"
+    INSURANCE_CERTIFICATE = "INSURANCE_CERTIFICATE"
+    UNKNOWN = "UNKNOWN"
+
+
+class Verdict(StrEnum):
+    AGREE = "AGREE"
+    DISAGREE = "DISAGREE"
+    AGREE_AT_HS_ROOT = "AGREE_AT_HS_ROOT"
+    CANNOT_VERIFY = "CANNOT_VERIFY"
+    SINGLE_SOURCE = "SINGLE_SOURCE"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    TOLERANCE_MATCH = "TOLERANCE_MATCH"
+
+
+class CellStatus(StrEnum):
+    PRESENT = "PRESENT"
+    LOW_CONFIDENCE = "LOW_CONFIDENCE"
+    ABSENT = "ABSENT"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    UNREADABLE = "UNREADABLE"
+
+
+class ShipmentStatus(StrEnum):
+    DRAFT = "DRAFT"
+    UPLOADING = "UPLOADING"
+    QUEUED = "QUEUED"
+    PROCESSING = "PROCESSING"
+    AWAITING_REVIEW = "AWAITING_REVIEW"
+    REVIEWED = "REVIEWED"
+    REPORT_ISSUED = "REPORT_ISSUED"
+    FAILED = "FAILED"
+    ARCHIVED = "ARCHIVED"
+
+
+class DocumentStatus(StrEnum):
+    REGISTERED = "REGISTERED"
+    INGESTED = "INGESTED"
+    CLASSIFIED = "CLASSIFIED"
+    EXTRACTED = "EXTRACTED"
+    FAILED = "FAILED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class DocTypeSource(StrEnum):
+    MODEL = "MODEL"
+    USER = "USER"
+
+
+class DecisionAction(StrEnum):
+    ACCEPT_SUGGESTION = "ACCEPT_SUGGESTION"
+    OVERRIDE = "OVERRIDE"
+    FLAG_FOR_FOLLOW_UP = "FLAG_FOR_FOLLOW_UP"
+    DISMISS_AS_NOT_AN_ISSUE = "DISMISS_AS_NOT_AN_ISSUE"
+
+
+class Severity(StrEnum):
+    BLOCKING = "BLOCKING"
+    WARNING = "WARNING"
+    INFO = "INFO"
+
+
+class ExplanationState(StrEnum):
+    PENDING = "PENDING"
+    READY = "READY"
+    UNAVAILABLE = "UNAVAILABLE"
+    NOT_REQUIRED = "NOT_REQUIRED"
+    RESOLVED = "RESOLVED"
+
+
+class Role(StrEnum):
+    OWNER = "OWNER"
+    APPROVER = "APPROVER"
+    VIEWER = "VIEWER"
+
+
+class Stage(StrEnum):
+    INGEST = "INGEST"
+    CLASSIFY = "CLASSIFY"
+    EXTRACT = "EXTRACT"
+    RECONCILE = "RECONCILE"
+    EXPLAIN = "EXPLAIN"
+    READY = "READY"
+
+
+STAGE_ORDER: list[Stage] = [
+    Stage.INGEST,
+    Stage.CLASSIFY,
+    Stage.EXTRACT,
+    Stage.RECONCILE,
+    Stage.EXPLAIN,
+    Stage.READY,
+]
+
+
+def next_stage(stage: Stage) -> Stage | None:
+    i = STAGE_ORDER.index(stage)
+    return STAGE_ORDER[i + 1] if i + 1 < len(STAGE_ORDER) else None
