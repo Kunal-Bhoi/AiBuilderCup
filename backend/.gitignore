@@ -4,3 +4,4 @@ __pycache__/
 .local/
 .env
 .pytest_cache/
+samples/out/

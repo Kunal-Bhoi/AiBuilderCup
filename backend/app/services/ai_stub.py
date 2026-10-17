@@ -139,6 +139,11 @@ def _decimal(text: str) -> Decimal | None:
         return None
 
 
+def _plain(n: Decimal) -> str:
+    """Decimal without exponent or trailing zeros: 480.000 -> '480', 47.50 -> '47.5'."""
+    return format(n.normalize(), "f")
+
+
 def normalise(field_key: str, raw: str) -> tuple[str | None, str | None]:
     """Returns (normalized_value, normalized_unit). None value means it could not be normalised."""
     t = unicodedata.normalize("NFKC", raw).strip()
@@ -151,7 +156,7 @@ def normalise(field_key: str, raw: str) -> tuple[str | None, str | None]:
         if field_key in {"net_weight", "gross_weight"}:
             m = re.search(r"(kgs?|kilograms?|lbs?|mt|tonnes|\bt\b|\bg\b)", low)
             factor = _WEIGHT.get(m.group(1), Decimal(1)) if m else Decimal(1)
-            return str((n * factor).quantize(Decimal("0.001")).normalize()), "KG"
+            return _plain((n * factor).quantize(Decimal("0.001"))), "KG"
         for sym, code in _CURRENCY.items():
             if sym in low:
                 unit = code
@@ -162,7 +167,7 @@ def normalise(field_key: str, raw: str) -> tuple[str | None, str | None]:
         if n is None:
             return None, None
         m = re.search(r"[a-z]+", low)
-        return str(n.normalize() if n == n.to_integral() else n), (_UOM.get(m.group(0)) if m else None)
+        return _plain(n), (_UOM.get(m.group(0)) if m else None)
     if field_key == "hs_code":
         digits = re.sub(r"[^0-9]", "", t)
         return (digits or None), None
@@ -256,7 +261,7 @@ def extract(req: ai.ExtractRequest, filename: str | None = None) -> ai.ExtractRe
         # "Quantity: 100 PCS" also carries the unit of measure.
         if key == "quantity" and unit and "quantity_uom" in wanted and "quantity_uom" not in found:
             found["quantity_uom"] = ai.ExtractedFieldOut(
-                field_key="quantity_uom", raw_value=value, normalized_value=unit, confidence=0.9,
+                field_key="quantity_uom", raw_value=value.split()[-1], normalized_value=unit, confidence=0.9,
                 provenance=found[key].provenance,
             )
     seen = set(found) | {u.field_key for u in unreadable}
@@ -289,7 +294,9 @@ def _tokens(text: str) -> frozenset[str]:
     t = unicodedata.normalize("NFKC", text).casefold()
     t = re.sub(r"(\d)\s*(in|inch|\")\b", r"\1 inch", t)
     t = re.sub(r"[^\w\s]", " ", t)
-    return frozenset(_ABBREV.get(w, w) for w in t.split() if w not in _STOP)
+    words = (_ABBREV.get(w, w) for w in t.split() if w not in _STOP)
+    # crude plural folding: "computers" == "computer"
+    return frozenset(w[:-1] if len(w) > 3 and w.endswith("s") and not w.endswith("ss") else w for w in words)
 
 
 def _similar(a: frozenset[str], b: frozenset[str]) -> float:
@@ -391,12 +398,19 @@ def reconcile(req: ai.ReconcileRequest) -> ai.ReconcileResponse:
         if not applicable:
             verdicts.append(ai.FieldVerdictOut(field_key=key, verdict=Verdict.NOT_APPLICABLE))
             continue
-        present = [f for f in by_field.get(key, [])
-                   if f.cell_status == CellStatus.PRESENT and f.confidence >= floor and f.normalized_value]
+        cells = by_field.get(key, [])
+        present = [f for f in cells if f.cell_status == CellStatus.PRESENT and f.confidence >= floor and f.normalized_value]
         if not present:
-            verdicts.append(ai.FieldVerdictOut(
-                field_key=key, verdict=Verdict.CANNOT_VERIFY,
-                verdict_reason=f"Expected in {len(applicable)} document(s), readable in none."))
+            required = [d for d in applicable if APPLICABILITY[key].get(doc_types[d]) == "R"]
+            unreadable = [f for f in cells if f.cell_status in (CellStatus.UNREADABLE, CellStatus.LOW_CONFIDENCE)]
+            if required or unreadable:
+                verdicts.append(ai.FieldVerdictOut(
+                    field_key=key, verdict=Verdict.CANNOT_VERIFY,
+                    verdict_reason=f"Expected in {len(required or unreadable)} document(s), readable in none."))
+            else:
+                verdicts.append(ai.FieldVerdictOut(
+                    field_key=key, verdict=Verdict.NOT_APPLICABLE,
+                    verdict_reason="Optional in the uploaded document types and present in none."))
             continue
         if len(present) == 1:
             verdicts.append(ai.FieldVerdictOut(
