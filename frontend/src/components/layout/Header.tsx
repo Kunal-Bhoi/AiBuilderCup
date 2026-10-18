@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getSession } from "@/services/session";
 import { useShipments } from "@/hooks/useShipments";
 export function Header() {
   const session = getSession();
+  const roleLabel = { OWNER: "Owner", APPROVER: "Approver", VIEWER: "Viewer" }[session.role];
   const location = useLocation();
   const navigate = useNavigate();
   const [dark, setDark] = useState(() => localStorage.getItem("tradeguard-theme") === "dark");
@@ -24,7 +26,16 @@ export function Header() {
     <form className="relative hidden md:block w-56" onSubmit={event => { event.preventDefault(); navigate("/dashboard?q=" + encodeURIComponent(search)); }}><Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" /><Input aria-label="Search shipments" placeholder="Search shipments, press Enter" value={search} onChange={e => setSearch(e.target.value)} className="h-8 pl-8 text-xs bg-muted/40" /></form>
     <Button variant="ghost" size="icon-sm" aria-label="Notifications" onClick={() => setNotifications(true)} className="relative"><Bell />{pending.length > 0 && <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary" />}</Button>
     <Button variant="ghost" size="icon-sm" aria-label="Toggle theme" onClick={() => setDark(value => !value)}>{dark ? <Sun /> : <Moon />}</Button>
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary" title={session.userId + " · " + session.role}>{session.userId.slice(0, 2).toUpperCase()}</div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" aria-label={"Account: " + session.userId + ", role " + roleLabel + ". Open settings"} onClick={() => navigate("/settings")} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground hover:ring-2 hover:ring-primary/30 hover:ring-offset-2 hover:ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{session.userId.slice(0, 2).toUpperCase()}</button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" align="end" className="border bg-popover text-popover-foreground shadow-md">
+        <p className="font-semibold">{session.userId}</p>
+        <p className="text-muted-foreground">{roleLabel} · {session.orgId}</p>
+        <p className="mt-1 text-muted-foreground">{session.mode === "demo" ? "Demo mode" : "Click to change your review role"}</p>
+      </TooltipContent>
+    </Tooltip>
     <Dialog open={notifications} onOpenChange={setNotifications}><DialogContent><DialogHeader><DialogTitle>Needs your attention</DialogTitle><DialogDescription>Current shipments awaiting review or a retry.</DialogDescription></DialogHeader><div className="space-y-2">{pending.length === 0 ? <p className="text-sm text-muted-foreground">You're all caught up.</p> : pending.map(item => <Link key={item.id} to={"/shipments/" + item.id + (item.status === "failed" ? "/processing" : "/results")} onClick={() => setNotifications(false)} className="block rounded-lg border p-3 hover:bg-muted"><p className="text-sm font-medium">{item.reference}</p><p className="text-xs text-muted-foreground">{item.status === "failed" ? "Validation failed. Retry processing." : "Ready for human review."}</p></Link>)}</div></DialogContent></Dialog>
   </header>;
 }
