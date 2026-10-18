@@ -220,8 +220,6 @@ tenacity==9.1.4
     # via google-genai
 typing-extensions==4.16.0
     # via
-    #   aiohttp
-    #   aiosignal
     #   alembic
     #   anyio
     #   fastapi
@@ -232,7 +230,6 @@ typing-extensions==4.16.0
     #   pydantic-core
     #   pydantic-settings
     #   sqlalchemy
-    #   starlette
     #   typing-inspection
 typing-inspection==0.4.4
     # via

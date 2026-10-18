@@ -2,7 +2,7 @@
 name = "tradecheck-backend"
 version = "0.1.0"
 description = "api-service and worker-service for cross-document trade file pre-validation"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
   "fastapi>=0.115",
   "uvicorn[standard]>=0.30",

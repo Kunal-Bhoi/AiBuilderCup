@@ -117,7 +117,7 @@ Each stage is idempotent and retried by Cloud Tasks. **Partial success is succes
 | Layer | Technology |
 |---|---|
 | **AI** | Gemini on **Vertex AI** via `google-genai` |
-| **Backend** | Python 3.12 · FastAPI · Pydantic 2 · SQLAlchemy 2 (async) + asyncpg · Alembic |
+| **Backend** | Python 3.13 · FastAPI · Pydantic 2 · SQLAlchemy 2 (async) + asyncpg · Alembic |
 | **Documents** | pypdfium2 (rendering) · pypdf · Pillow + pillow-heif · openpyxl (XLSX) · reportlab (report PDF) · cryptography |
 | **Frontend** | React 18 · TypeScript · Vite 7 · Tailwind CSS 3 · Radix UI · TanStack Query 5 · React Router 7 · axios |
 | **Google Cloud** | Cloud Run · Cloud SQL (PostgreSQL 16) · Cloud Storage · Cloud Tasks · Cloud KMS · Secret Manager · Vertex AI · Cloud Build (buildpacks) · Artifact Registry · Cloud Logging |
@@ -137,7 +137,7 @@ docs/images/ screenshots used in this README
 
 ## Run locally
 
-Prerequisites: Python 3.12 with [uv](https://docs.astral.sh/uv/), Node.js, and PostgreSQL 16. No cloud account is needed: local mode uses a deterministic AI stub, local storage and a local signing key.
+Prerequisites: Python 3.13 with [uv](https://docs.astral.sh/uv/), Node.js, and PostgreSQL 16. No cloud account is needed: local mode uses a deterministic AI stub, local storage and a local signing key.
 
 ```bash
 # PostgreSQL (macOS / Homebrew)
@@ -147,7 +147,7 @@ psql -d postgres -c "CREATE DATABASE tradecheck OWNER tradecheck;" -c "CREATE DA
 
 # Backend on :8080
 cd backend
-uv sync --python 3.12
+uv sync --python 3.13
 uv run alembic upgrade head
 uv run python samples/generate.py          # sample shipments in samples/out/
 uv run uvicorn app.main:app --port 8080

@@ -23,6 +23,7 @@ GEMINI_MODEL_CLASSIFY="${GEMINI_MODEL_CLASSIFY:-}"
 GEMINI_API="${GEMINI_API:-interactions}"      # or generate_content
 ORIGINS="${ALLOWED_ORIGINS:-*}"
 API_MIN_INSTANCES="${API_MIN_INSTANCES:-0}"   # set to 1 on judging day
+# Max instances: worker 8 x 2 vCPU + api 4 x 1 vCPU = 20, the default regional Cloud Run CPU quota.
 
 SRC="$(cd "$(dirname "$0")/../backend" && pwd)"
 FRONTEND="$(cd "$(dirname "$0")/../frontend" && pwd)"
@@ -48,7 +49,7 @@ cp -R "$FRONTEND/dist" "$SRC/static"
 echo "== worker-service (internal ingress, invoked only by Cloud Tasks as worker-sa)"
 gc run deploy worker-service --source "$SRC" --region "$REGION" --service-account "$WORKER_SA" \
   --no-allow-unauthenticated --ingress internal --cpu 2 --memory 2Gi --concurrency 1 --timeout 1800 \
-  --no-cpu-throttling --min-instances 0 --max-instances 20 \
+  --no-cpu-throttling --min-instances 0 --max-instances 8 \
   --set-secrets DB_PASSWORD=tradecheck-db-password:latest \
   --set-env-vars "$(common_env "SERVICE_ROLE=worker")" -q
 WORKER_URL="$(gc run services describe worker-service --region "$REGION" --format 'value(status.url)')"
@@ -64,13 +65,14 @@ echo "== migrations (Cloud Run Job, before traffic shifts)"
 gc run jobs deploy tradecheck-migrate --image "$IMAGE" --region "$REGION" --service-account "$WORKER_SA" \
   --set-secrets DB_PASSWORD=tradecheck-db-password:latest \
   --set-env-vars "$(common_env "SERVICE_ROLE=worker")" \
-  --command python --args=-m,alembic,upgrade,head --max-retries 0 -q
+  --command /cnb/lifecycle/launcher --args=python,-m,alembic,upgrade,head --max-retries 0 -q
+# (the buildpack launcher sets up the image's Python environment; a bare "python" would bypass it)
 gc run jobs execute tradecheck-migrate --region "$REGION" --wait -q
 
 echo "== api-service (public, no login)"
 gc run deploy api-service --image "$IMAGE" --region "$REGION" --service-account "$API_SA" \
   --allow-unauthenticated --cpu 1 --memory 512Mi --concurrency 80 --timeout 900 \
-  --min-instances "$API_MIN_INSTANCES" --max-instances 10 \
+  --min-instances "$API_MIN_INSTANCES" --max-instances 4 \
   --set-secrets DB_PASSWORD=tradecheck-db-password:latest \
   --set-env-vars "$(common_env "SERVICE_ROLE=api;WORKER_URL=$WORKER_URL")" -q
 API_URL="$(gc run services describe api-service --region "$REGION" --format 'value(status.url)')"

@@ -40,7 +40,7 @@ psql -d postgres -c "CREATE ROLE tradecheck LOGIN PASSWORD 'tradecheck' CREATEDB
 psql -d postgres -c "CREATE DATABASE tradecheck OWNER tradecheck;" -c "CREATE DATABASE tradecheck_test OWNER tradecheck;"
 
 cd backend
-uv sync --python 3.12
+uv sync --python 3.13
 uv run alembic upgrade head
 uv run python samples/generate.py          # sample shipments in samples/out/
 uv run uvicorn app.main:app --port 8080    # all dev modes are the defaults
