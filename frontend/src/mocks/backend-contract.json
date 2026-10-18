@@ -1,0 +1,481 @@
+{
+  "shipment": {
+    "shipment_id": "shp_contract",
+    "reference": "CONTRACT-001",
+    "status": "AWAITING_REVIEW",
+    "version": 3,
+    "created_by": "user_dev",
+    "created_at": "2026-10-18T07:00:00Z",
+    "updated_at": "2026-10-18T07:00:00Z",
+    "documents": [
+      {
+        "document_id": "doc_invoice",
+        "filename": "invoice.pdf",
+        "doc_type": "COMMERCIAL_INVOICE",
+        "doc_type_confidence": 0.98,
+        "doc_type_source": "MODEL",
+        "page_count": 2,
+        "status": "EXTRACTED",
+        "error_code": null,
+        "superseded_by": null,
+        "size_bytes": 1500,
+        "content_type": "application/pdf",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "created_at": "2026-10-18T07:00:00Z"
+      },
+      {
+        "document_id": "doc_packing",
+        "filename": "packing.xlsx",
+        "doc_type": "PACKING_LIST",
+        "doc_type_confidence": 0.98,
+        "doc_type_source": "MODEL",
+        "page_count": 2,
+        "status": "EXTRACTED",
+        "error_code": null,
+        "superseded_by": null,
+        "size_bytes": 1500,
+        "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "created_at": "2026-10-18T07:00:00Z"
+      }
+    ],
+    "current_run": {
+      "run_id": "run_contract",
+      "state": "SUCCEEDED",
+      "stage": "READY",
+      "error_code": null,
+      "error_message": null,
+      "started_at": "2026-10-18T07:00:00Z",
+      "finished_at": "2026-10-18T07:00:00Z",
+      "verdict_counts": {
+        "DISAGREE": 1,
+        "AGREE_AT_HS_ROOT": 1,
+        "CANNOT_VERIFY": 1,
+        "SINGLE_SOURCE": 1
+      },
+      "cost_usd": 0.012,
+      "input_tokens": 10,
+      "output_tokens": 20
+    },
+    "missing_documents": [
+      {
+        "doc_type": "CERTIFICATE_OF_ORIGIN",
+        "severity": "WARNING",
+        "reason": "A certificate is needed to support the preference claim."
+      }
+    ],
+    "open_discrepancy_count": 1,
+    "decided_discrepancy_count": 0,
+    "report_id": null
+  },
+  "summary": {
+    "shipment_id": "shp_contract",
+    "reference": "CONTRACT-001",
+    "status": "AWAITING_REVIEW",
+    "version": 3,
+    "document_count": 2,
+    "open_discrepancy_count": 1,
+    "created_at": "2026-10-18T07:00:00Z",
+    "updated_at": "2026-10-18T07:00:00Z"
+  },
+  "matrix": {
+    "shipment_id": "shp_contract",
+    "status": "AWAITING_REVIEW",
+    "run_id": "run_contract",
+    "generated_at": "2026-10-18T07:00:00Z",
+    "documents": [
+      {
+        "document_id": "doc_invoice",
+        "filename": "invoice.pdf",
+        "doc_type": "COMMERCIAL_INVOICE",
+        "doc_type_confidence": 0.98,
+        "doc_type_source": "MODEL",
+        "page_count": 2,
+        "status": "EXTRACTED",
+        "error_code": null,
+        "superseded_by": null
+      },
+      {
+        "document_id": "doc_packing",
+        "filename": "packing.xlsx",
+        "doc_type": "PACKING_LIST",
+        "doc_type_confidence": 0.98,
+        "doc_type_source": "MODEL",
+        "page_count": 2,
+        "status": "EXTRACTED",
+        "error_code": null,
+        "superseded_by": null
+      }
+    ],
+    "field_groups": [
+      {
+        "group": "Goods",
+        "fields": [
+          {
+            "field_key": "quantity",
+            "label": "Quantity",
+            "verdict": "DISAGREE",
+            "verdict_reason": "Values differ.",
+            "discrepancy_id": "dsc_quantity",
+            "value_groups": [],
+            "cells": [
+              {
+                "document_id": "doc_invoice",
+                "cell_status": "PRESENT",
+                "raw_value": "100",
+                "normalized_value": "100",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              },
+              {
+                "document_id": "doc_packing",
+                "cell_status": "PRESENT",
+                "raw_value": "95",
+                "normalized_value": "95",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              }
+            ]
+          },
+          {
+            "field_key": "hs_code",
+            "label": "HS code",
+            "verdict": "AGREE_AT_HS_ROOT",
+            "verdict_reason": "Only the four-digit product-code root agrees.",
+            "discrepancy_id": null,
+            "value_groups": [],
+            "cells": [
+              {
+                "document_id": "doc_invoice",
+                "cell_status": "PRESENT",
+                "raw_value": "7306.30",
+                "normalized_value": "7306.30",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              },
+              {
+                "document_id": "doc_packing",
+                "cell_status": "PRESENT",
+                "raw_value": "7306.90",
+                "normalized_value": "7306.90",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              }
+            ]
+          },
+          {
+            "field_key": "gross_weight",
+            "label": "Gross weight",
+            "verdict": "CANNOT_VERIFY",
+            "verdict_reason": "One value has low extraction confidence.",
+            "discrepancy_id": null,
+            "value_groups": [],
+            "cells": [
+              {
+                "document_id": "doc_invoice",
+                "cell_status": "PRESENT",
+                "raw_value": "500",
+                "normalized_value": "500",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              },
+              {
+                "document_id": "doc_packing",
+                "cell_status": "LOW_CONFIDENCE",
+                "raw_value": "480",
+                "normalized_value": "480",
+                "normalized_unit": null,
+                "confidence": 0.3,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              }
+            ]
+          },
+          {
+            "field_key": "net_weight",
+            "label": "Net weight",
+            "verdict": "SINGLE_SOURCE",
+            "verdict_reason": "Only one readable source.",
+            "discrepancy_id": null,
+            "value_groups": [],
+            "cells": [
+              {
+                "document_id": "doc_invoice",
+                "cell_status": "PRESENT",
+                "raw_value": "460",
+                "normalized_value": "460",
+                "normalized_unit": null,
+                "confidence": 0.98,
+                "provenance": {
+                  "page": 2,
+                  "bbox": [
+                    0.1,
+                    0.2,
+                    0.4,
+                    0.25
+                  ],
+                  "model": "contract-model",
+                  "model_version": "1",
+                  "prompt_version": "1",
+                  "extracted_at": "2026-10-18T07:00:00Z"
+                }
+              },
+              {
+                "document_id": "doc_packing",
+                "cell_status": "ABSENT",
+                "raw_value": null,
+                "normalized_value": null,
+                "normalized_unit": null,
+                "confidence": 0.0,
+                "provenance": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "missing_documents": [
+      {
+        "doc_type": "CERTIFICATE_OF_ORIGIN",
+        "severity": "WARNING",
+        "reason": "A certificate is needed to support the preference claim."
+      }
+    ],
+    "out_of_scope_fields": [
+      "insurance_value"
+    ],
+    "verdict_counts": {
+      "DISAGREE": 1,
+      "AGREE_AT_HS_ROOT": 1,
+      "CANNOT_VERIFY": 1,
+      "SINGLE_SOURCE": 1
+    }
+  },
+  "findings": {
+    "shipment_id": "shp_contract",
+    "run_id": "run_contract",
+    "items": [
+      {
+        "discrepancy_id": "dsc_quantity",
+        "shipment_id": "shp_contract",
+        "field_key": "quantity",
+        "label": "Quantity",
+        "verdict": "DISAGREE",
+        "verdict_reason": "Values differ.",
+        "severity": "BLOCKING",
+        "explanation": "The invoice declares 100 units; the packing list declares 95.",
+        "explanation_state": "READY",
+        "assessment_confidence": "HIGH",
+        "likely_incorrect_document_id": "doc_packing",
+        "suggested_document_id": "doc_invoice",
+        "suggested_value": "100",
+        "version": 1,
+        "decided": false,
+        "latest_decision": null,
+        "cells": [
+          {
+            "document_id": "doc_invoice",
+            "cell_status": "PRESENT",
+            "raw_value": "100",
+            "normalized_value": "100",
+            "normalized_unit": null,
+            "confidence": 0.98,
+            "provenance": {
+              "page": 2,
+              "bbox": [
+                0.1,
+                0.2,
+                0.4,
+                0.25
+              ],
+              "model": "contract-model",
+              "model_version": "1",
+              "prompt_version": "1",
+              "extracted_at": "2026-10-18T07:00:00Z"
+            }
+          },
+          {
+            "document_id": "doc_packing",
+            "cell_status": "PRESENT",
+            "raw_value": "95",
+            "normalized_value": "95",
+            "normalized_unit": null,
+            "confidence": 0.98,
+            "provenance": {
+              "page": 2,
+              "bbox": [
+                0.1,
+                0.2,
+                0.4,
+                0.25
+              ],
+              "model": "contract-model",
+              "model_version": "1",
+              "prompt_version": "1",
+              "extracted_at": "2026-10-18T07:00:00Z"
+            }
+          }
+        ],
+        "created_at": "2026-10-18T07:00:00Z"
+      }
+    ]
+  },
+  "coverage": {
+    "shipment_id": "shp_contract",
+    "run_id": "run_contract",
+    "checked_fields": [
+      {
+        "field_key": "quantity",
+        "label": "Quantity",
+        "group": "Goods",
+        "verdict": "DISAGREE"
+      },
+      {
+        "field_key": "hs_code",
+        "label": "HS code",
+        "group": "Goods",
+        "verdict": "AGREE_AT_HS_ROOT"
+      }
+    ],
+    "single_source_fields": [
+      {
+        "field_key": "net_weight",
+        "label": "Net weight",
+        "group": "Goods",
+        "verdict": "SINGLE_SOURCE"
+      }
+    ],
+    "cannot_verify_fields": [
+      {
+        "field_key": "gross_weight",
+        "label": "Gross weight",
+        "group": "Goods",
+        "verdict": "CANNOT_VERIFY"
+      }
+    ],
+    "not_applicable_fields": [
+      {
+        "field_key": "vessel_name",
+        "label": "Vessel name",
+        "group": "Transport",
+        "verdict": "NOT_APPLICABLE"
+      }
+    ],
+    "out_of_scope": [
+      {
+        "key": "insurance_value",
+        "label": "Insurance value",
+        "reason": "Insurance amounts are outside current validation."
+      }
+    ],
+    "unchecked_documents": [
+      {
+        "document_id": "doc_bad",
+        "filename": "unreadable.pdf",
+        "doc_type": "UNKNOWN",
+        "status": "FAILED",
+        "error_code": "DOCUMENT_CORRUPT",
+        "reason": "The document could not be processed."
+      }
+    ],
+    "missing_documents": [
+      {
+        "doc_type": "CERTIFICATE_OF_ORIGIN",
+        "severity": "WARNING",
+        "reason": "A certificate is needed to support the preference claim."
+      }
+    ]
+  },
+  "report": {
+    "report_id": "rpt_contract",
+    "shipment_id": "shp_contract",
+    "issued_by": "user_dev",
+    "issued_at": "2026-10-18T07:00:00Z",
+    "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "signature_algorithm": "EC_P256_SHA256",
+    "signature_b64": "test-signature",
+    "kms_key_version": "local",
+    "download_url": "http://storage.test/report.pdf",
+    "expires_at": "2099-01-01T00:00:00Z"
+  },
+  "decisions": {
+    "shipment_id": "shp_contract",
+    "items": []
+  }
+}

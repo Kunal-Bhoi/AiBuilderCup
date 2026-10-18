@@ -55,6 +55,9 @@ const SHIPMENT_STATUS_CONFIG: Record<
   ShipmentStatus,
   { label: string; variant: "default" | "success" | "destructive" | "warning" | "info" | "muted" | "secondary"; icon: React.ElementType }
 > = {
+  uploading: { label: "Uploading", variant: "info", icon: Clock },
+  reviewed: { label: "Reviewed · report pending", variant: "info", icon: CheckCheck },
+  archived: { label: "Archived", variant: "muted", icon: Ban },
   draft: { label: "Draft", variant: "muted", icon: Minus },
   queued: { label: "Queued", variant: "secondary", icon: Clock },
   processing: { label: "Processing", variant: "info", icon: Loader2 },

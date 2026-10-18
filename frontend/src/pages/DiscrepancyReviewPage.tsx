@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -33,121 +34,35 @@ import { useValidationResults, useReviewFinding, useShipment } from "@/hooks/use
 import { cn, formatDateTime } from "@/lib/utils"
 import { DocumentViewer } from "@/components/documents/DocumentViewer"
 import { ErrorState } from "@/components/ui/error-state"
-import type { Finding, ReviewDecision } from "@/types"
+import { canReview } from "@/services/session"
+import type { Finding, ReviewDecision, ReviewFindingPayload } from "@/types"
 
-const DECISION_CONFIG: Record<ReviewDecision, { label: string; description: string; color: string }> = {
-  confirm_issue: {
-    label: "Confirm Issue",
-    description: "Confirm this is a genuine discrepancy that needs correction",
-    color: "border-red-200 bg-red-50 hover:bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200",
-  },
-  override_finding: {
-    label: "Override Finding",
-    description: "Mark as acceptable — provide mandatory reason",
-    color: "border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200",
-  },
-  request_correction: {
-    label: "Request Correction",
-    description: "Flag for document correction from the shipper",
-    color: "border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200",
-  },
-}
-
-// ─── Review Action Dialog ─────────────────────────────────────────────────────
-function ReviewDialog({
-  finding,
-  open,
-  onClose,
-  onSubmit,
-  isPending,
-}: {
-  finding: Finding | null
-  open: boolean
-  onClose: () => void
-  onSubmit: (decision: ReviewDecision, reason?: string) => void
-  isPending: boolean
+const DECISIONS: Record<ReviewDecision, { label: string; description: string }> = {
+  ACCEPT_SUGGESTION: { label: "Accept suggestion", description: "Use the suggested source value when one is available." },
+  OVERRIDE: { label: "Override value", description: "Choose a source document or enter a corrected value. A reason is required." },
+  FLAG_FOR_FOLLOW_UP: { label: "Flag for follow-up", description: "Record a follow-up decision. This does not send a message to the shipper." },
+  DISMISS_AS_NOT_AN_ISSUE: { label: "Dismiss as not an issue", description: "Record why this finding is not an issue. A reason is required." },
+};
+function ReviewDialog({ finding, documents, open, onClose, onSubmit, isPending, error }: {
+  finding: Finding | null; documents: { id: string; filename: string }[]; open: boolean; onClose: () => void;
+  onSubmit: (payload: ReviewFindingPayload) => void; isPending: boolean; error: Error | null;
 }) {
-  const [decision, setDecision] = useState<ReviewDecision | null>(null)
-  const [reason, setReason] = useState("")
-
-  const canSubmit =
-    decision !== null &&
-    (decision !== "override_finding" || reason.trim().length >= 10)
-
-  const handleSubmit = () => {
-    if (!decision) return
-    onSubmit(decision, reason || undefined)
-
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Review Finding</DialogTitle>
-          <DialogDescription>
-            Field: <strong>{finding?.label}</strong>
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3">
-          {(Object.entries(DECISION_CONFIG) as [ReviewDecision, typeof DECISION_CONFIG[ReviewDecision]][]).map(
-            ([key, config]) => (
-              <button
-                key={key}
-                onClick={() => setDecision(key)}
-                className={cn(
-                  "w-full rounded-lg border p-3 text-left transition-all",
-                  config.color,
-                  decision === key && "ring-2 ring-primary ring-offset-1"
-                )}
-              >
-                <p className="text-sm font-semibold">{config.label}</p>
-                <p className="text-xs mt-0.5 opacity-80">{config.description}</p>
-              </button>
-            )
-          )}
-
-          {decision === "override_finding" && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                Reason <span className="text-destructive">*</span>
-                <span className="text-muted-foreground font-normal ml-1">(minimum 10 characters)</span>
-              </label>
-              <Textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Explain why this discrepancy is acceptable..."
-                rows={3}
-              />
-            </div>
-          )}
-
-          {decision && decision !== "override_finding" && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Notes (optional)</label>
-              <Textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Add any additional notes..."
-                rows={2}
-              />
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || isPending}>
-            {isPending ? "Submitting..." : "Submit Review"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+  const [decision, setDecision] = useState<ReviewDecision | null>(null);
+  const [reason, setReason] = useState("");
+  const [chosenDocumentId, setChosenDocumentId] = useState("");
+  const [chosenValue, setChosenValue] = useState("");
+  const needsReason = decision === "OVERRIDE" || decision === "DISMISS_AS_NOT_AN_ISSUE";
+  const valid = !!decision && (!needsReason || reason.trim().length >= 10) && (decision !== "OVERRIDE" || !!chosenDocumentId || !!chosenValue.trim()) && (decision !== "ACCEPT_SUGGESTION" || finding?.suggestedValue != null);
+  return <Dialog open={open} onOpenChange={value => { if (!value && !isPending) onClose(); }}><DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Review Finding</DialogTitle><DialogDescription>{finding?.label} · current version {finding?.version ?? 1}</DialogDescription></DialogHeader>
+    <div className="space-y-2">{(Object.entries(DECISIONS) as [ReviewDecision, typeof DECISIONS[ReviewDecision]][]).map(([action, config]) => <button key={action} disabled={isPending || (action === "ACCEPT_SUGGESTION" && finding?.suggestedValue == null)} onClick={() => setDecision(action)} className={cn("w-full rounded-lg border p-3 text-left disabled:opacity-40", decision === action && "border-primary bg-primary/5 ring-1 ring-primary")}><p className="text-sm font-semibold">{config.label}</p><p className="mt-1 text-xs text-muted-foreground">{config.description}</p></button>)}</div>
+    {decision === "ACCEPT_SUGGESTION" && <p className="rounded-md bg-muted p-3 text-sm">Suggested value: <strong>{finding?.suggestedValue}</strong></p>}
+    {decision === "OVERRIDE" && <div className="space-y-3"><div><label className="text-sm font-medium" htmlFor="chosen-document">Source document</label><select id="chosen-document" value={chosenDocumentId} onChange={event => setChosenDocumentId(event.target.value)} className="mt-1 h-9 w-full rounded border bg-background px-2 text-sm"><option value="">Select a source, or enter a corrected value below</option>{documents.map(doc => <option key={doc.id} value={doc.id}>{doc.filename}</option>)}</select></div><div><label className="text-sm font-medium" htmlFor="chosen-value">Corrected value</label><Input id="chosen-value" className="mt-1" value={chosenValue} onChange={event => setChosenValue(event.target.value)} placeholder="Enter the value you verified" /></div></div>}
+    {decision && <div><label htmlFor="review-reason" className="text-sm font-medium">{needsReason ? "Reason (at least 10 characters)" : "Notes (optional)"}</label><Textarea id="review-reason" className="mt-1" value={reason} onChange={event => setReason(event.target.value)} rows={3} /></div>}
+    {error && <p role="alert" className="rounded border border-destructive/30 p-3 text-sm text-destructive">{error.message} If this finding changed, close this dialog and review the refreshed values before trying again.</p>}
+    <DialogFooter><Button variant="outline" disabled={isPending} onClick={onClose}>Cancel</Button><Button disabled={!valid || isPending} onClick={() => decision && onSubmit({ decision, reason: reason.trim() || undefined, chosenDocumentId: chosenDocumentId || undefined, chosenValue: chosenValue.trim() || undefined, expectedVersion: finding?.version ?? 1 })}>{isPending ? "Saving decision…" : "Submit Review"}</Button></DialogFooter>
+  </DialogContent></Dialog>;
 }
 
-// ─── Discrepancy Review Page ──────────────────────────────────────────────────
 export default function DiscrepancyReviewPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -160,6 +75,8 @@ export default function DiscrepancyReviewPage() {
   const [selectedId, setSelectedId] = useState(params.get("finding"))
   const [severityFilter, setSeverityFilter] = useState<string>("all")
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
+  const [leftId, setLeftId] = useState("")
+  const [rightId, setRightId] = useState("")
 
   const findings = (results?.findings ?? []).filter((f) =>
     severityFilter === "all" || f.severity === severityFilter
@@ -168,10 +85,10 @@ export default function DiscrepancyReviewPage() {
   const setCurrentIdx = (index: number) => setSelectedId(findings[index]?.id ?? null)
   const currentFinding = findings[currentIdx] ?? null
 
-  const handleReview = async (decision: ReviewDecision, reason?: string) => {
+  const handleReview = async (payload: ReviewFindingPayload) => {
     if (!currentFinding) return
     try {
-      await reviewFinding.mutateAsync({ findingId: currentFinding.id, payload: { decision, reason } })
+      await reviewFinding.mutateAsync({ findingId: currentFinding.id, payload })
     } catch { return }
     setReviewDialogOpen(false)
     // Auto-advance to next pending
@@ -187,14 +104,14 @@ export default function DiscrepancyReviewPage() {
   const affectedDocs = currentFinding
     ? (results?.documents ?? []).filter((d) => currentFinding.affectedDocuments.includes(d.id))
     : []
-  const doc1 = affectedDocs[0]
-  const doc2 = affectedDocs[1]
+  const doc1 = affectedDocs.find(doc => doc.id === leftId) ?? affectedDocs[0]
+  const doc2 = affectedDocs.find(doc => doc.id === rightId && doc.id !== doc1?.id) ?? affectedDocs.find(doc => doc.id !== doc1?.id && currentFinding?.cells?.find(cell => cell.documentId === doc.id)?.rawValue !== currentFinding?.cells?.find(cell => cell.documentId === doc1?.id)?.rawValue) ?? affectedDocs.find(doc => doc.id !== doc1?.id)
 
   // Get cell values for current finding
   const getCellValue = (docId: string) => {
     if (!currentFinding || !results) return null
     const field = results.matrix.find((m) => m.fieldKey === currentFinding.fieldKey)
-    return field?.cells.find((c) => c.documentId === docId) ?? null
+    return field?.cells.find((c) => c.documentId === docId) ?? currentFinding.cells?.find(c => c.documentId === docId) ?? null
   }
 
   if (error) return <ErrorState error={error} retry={() => refetch()} />
@@ -291,14 +208,14 @@ export default function DiscrepancyReviewPage() {
               {/* Doc 1 Viewer */}
               {doc1 && (
                 <div className="flex-1 min-w-0 border-r flex flex-col h-[600px]">
-                  <DocumentViewer documentId={doc1.id} filename={doc1.filename} source={getCellValue(doc1.id)?.source} />
+                  <select aria-label="Left comparison document" className="h-9 shrink-0 border-b bg-background px-2 text-xs" value={doc1.id} onChange={event => setLeftId(event.target.value)}>{affectedDocs.map(doc => <option key={doc.id} value={doc.id}>{doc.filename}</option>)}</select><DocumentViewer documentId={doc1.id} filename={doc1.filename} pageCount={doc1.pageCount ?? 0} source={getCellValue(doc1.id)?.source} />
                 </div>
               )}
 
               {/* Doc 2 Viewer */}
               {doc2 && (
                 <div className="flex-1 min-w-0 border-r flex flex-col h-[600px]">
-                  <DocumentViewer documentId={doc2.id} filename={doc2.filename} source={getCellValue(doc2.id)?.source} />
+                  <select aria-label="Right comparison document" className="h-9 shrink-0 border-b bg-background px-2 text-xs" value={doc2.id} onChange={event => setRightId(event.target.value)}>{affectedDocs.filter(doc => doc.id !== doc1?.id).map(doc => <option key={doc.id} value={doc.id}>{doc.filename}</option>)}</select><DocumentViewer documentId={doc2.id} filename={doc2.filename} pageCount={doc2.pageCount ?? 0} source={getCellValue(doc2.id)?.source} />
                 </div>
               )}
 
@@ -409,7 +326,7 @@ export default function DiscrepancyReviewPage() {
                   </p>
                   <Button
                     className="w-full gap-1.5"
-                    disabled={shipment?.status === "finalized"}
+                    disabled={!canReview() || !["ready_for_review", "reviewed"].includes(shipment?.status ?? "")}
                     onClick={() => setReviewDialogOpen(true)}
                     variant={currentFinding.reviewStatus === "reviewed" ? "outline" : "default"}
                   >
@@ -427,7 +344,9 @@ export default function DiscrepancyReviewPage() {
       )}
 
       {reviewFinding.error && <p role="alert" className="p-4 text-sm text-destructive">{reviewFinding.error.message}</p>}
-      <ReviewDialog key={String(reviewDialogOpen) + currentFinding?.id}
+      <ReviewDialog key={String(reviewDialogOpen) + currentFinding?.id + currentFinding?.version}
+        documents={results?.documents ?? []}
+        error={reviewFinding.error}
         finding={currentFinding}
         open={reviewDialogOpen}
         onClose={() => setReviewDialogOpen(false)}

@@ -94,11 +94,12 @@ export function useCreateShipment() {
 export function useUploadDocuments(shipmentId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (files: File[]) =>
-      shipmentService.uploadDocuments(shipmentId, files),
+    mutationFn: (input: File[] | { files: File[]; onProgress?: import("@/types").UploadProgress }) =>
+      shipmentService.uploadDocuments(shipmentId, Array.isArray(input) ? input : input.files, Array.isArray(input) ? undefined : input.onProgress),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.shipment(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.processingStatus(shipmentId) })
+      qc.invalidateQueries({ queryKey: ["document-library"] })
     },
   })
 }
@@ -111,6 +112,7 @@ export function useRemoveDocument(shipmentId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.shipment(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.processingStatus(shipmentId) })
+      qc.invalidateQueries({ queryKey: ["document-library"] })
     },
   })
 }
@@ -122,6 +124,7 @@ export function useStartValidation(shipmentId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.shipment(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.processingStatus(shipmentId) })
+      qc.invalidateQueries({ queryKey: ["document-library"] })
       qc.invalidateQueries({ queryKey: queryKeys.shipments })
       qc.invalidateQueries({ queryKey: queryKeys.dashboardStats })
     },
@@ -138,10 +141,11 @@ export function useReviewFinding(shipmentId: string) {
       findingId: string
       payload: ReviewFindingPayload
     }) => shipmentService.reviewFinding(shipmentId, findingId, payload),
-    onSuccess: () => {
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: queryKeys.validationResults(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.shipment(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.processingStatus(shipmentId) })
+      qc.invalidateQueries({ queryKey: ["document-library"] })
       qc.invalidateQueries({ queryKey: queryKeys.report(shipmentId) })
     },
   })
@@ -154,6 +158,7 @@ export function useFinalizeReview(shipmentId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.shipment(shipmentId) })
       qc.invalidateQueries({ queryKey: queryKeys.processingStatus(shipmentId) })
+      qc.invalidateQueries({ queryKey: ["document-library"] })
       qc.invalidateQueries({ queryKey: queryKeys.shipments })
       qc.invalidateQueries({ queryKey: queryKeys.dashboardStats })
       qc.invalidateQueries({ queryKey: queryKeys.report(shipmentId) })
@@ -161,3 +166,5 @@ export function useFinalizeReview(shipmentId: string) {
     },
   })
 }
+
+export function useDocumentLibrary() { return useQuery({ queryKey: ["document-library"], queryFn: () => shipmentService.listDocuments() }); }

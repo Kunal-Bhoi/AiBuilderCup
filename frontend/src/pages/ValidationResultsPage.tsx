@@ -33,6 +33,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { useValidationResults, useShipment } from "@/hooks/useShipments"
+import { CoverageDetails } from "@/components/validation/CoverageDetails"
+import { cellValidationStatus } from "@/lib/workflow"
 import { ErrorState } from "@/components/ui/error-state"
 import { cn } from "@/lib/utils"
 import type { MatrixField, MatrixCell, Finding, ValidationStatus } from "@/types"
@@ -58,11 +60,10 @@ function SummaryCard({
 
 // ─── Matrix Cell Component ────────────────────────────────────────────────────
 function MatrixCellView({ cell, fieldStatus, onClick }: { cell: MatrixCell; fieldStatus: ValidationStatus; onClick?: () => void }) {
-  const missing = !cell.rawValue?.trim() || cell.source === null;
-  const status = fieldStatus === "not_checked" || fieldStatus === "not_applicable" ? fieldStatus : missing ? "cannot_verify" : fieldStatus;
+  const status = cellValidationStatus(cell, fieldStatus);
   return <td className={cn("border p-0 min-w-[175px]", getCellStatusClass(status))}><button className="w-full h-full min-h-24 px-3 py-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" onClick={onClick}>
-    <p className="text-xs font-medium leading-relaxed">{cell.rawValue ?? (status === "not_checked" ? "Not checked" : status === "not_applicable" ? "Not applicable" : "Missing / cannot verify")}</p>
-    <p className="mt-1 text-[10px] opacity-80">{status.replace(/_/g, " ")}{cell.source?.confidence != null ? ` | ${Math.round(cell.source.confidence * 100)}% confidence` : ""}</p>
+    <p className="text-xs font-medium leading-relaxed">{cell.rawValue || (status === "not_checked" ? "Not checked" : status === "not_applicable" ? "Not applicable" : "Missing / cannot verify")}</p>
+    <p className="mt-1 text-[10px] opacity-80">{cell.cellStatus ? cell.cellStatus.toLowerCase().replace(/_/g, " ") : status.replace(/_/g, " ")}{cell.normalizedUnit ? " · " + cell.normalizedUnit : ""}{cell.source?.confidence != null ? ` | ${Math.round(cell.source.confidence * 100)}% confidence` : ""}</p>
   </button></td>;
 }
 
@@ -299,10 +300,10 @@ export default function ValidationResultsPage() {
               <table className="min-w-full border-collapse text-sm" aria-label="Document validation matrix">
                 <thead className="sticky top-0 z-20"><tr className="bg-muted">
                   <th className="sticky left-0 z-30 min-w-[200px] border bg-muted p-4 text-left text-xs">Document / extracted field</th>
-                  {filteredMatrix.map(field => <th key={field.fieldKey} className="min-w-[175px] border p-3 text-left"><div className="text-xs font-semibold mb-2">{field.label}</div><ValidationStatusBadge status={field.status} size="sm" />{results.findings.find(f => f.fieldKey === field.fieldKey)?.reviewStatus === "reviewed" && <p className="text-[10px] text-muted-foreground mt-1">Reviewed</p>}</th>)}
+                  {filteredMatrix.map(field => <th key={field.fieldKey} className="min-w-[175px] border p-3 text-left"><div className="text-xs font-semibold mb-2">{field.label}</div><ValidationStatusBadge status={field.status} size="sm" />{field.verdict && ["AGREE_AT_HS_ROOT", "TOLERANCE_MATCH", "SINGLE_SOURCE"].includes(field.verdict) && <p className="mt-1 text-[10px] font-normal" title={field.reason ?? undefined}>{field.verdict === "AGREE_AT_HS_ROOT" ? "HS root agreement only" : field.verdict === "TOLERANCE_MATCH" ? "Within allowed tolerance" : "Single source only"}</p>}{field.reason && <p className="mt-1 max-w-[220px] text-[10px] font-normal text-muted-foreground">{field.reason}</p>}{results.findings.find(f => f.fieldKey === field.fieldKey)?.reviewStatus === "reviewed" && <p className="text-[10px] text-muted-foreground mt-1">Reviewed</p>}</th>)}
                 </tr></thead>
                 <tbody>{filteredMatrix.length === 0 ? <tr><td className="p-8 text-muted-foreground">No fields match your filters.</td></tr> : results.documents.map(doc => <tr key={doc.id}>
-                  <th scope="row" className="sticky left-0 z-10 border bg-background p-4 text-left"><div className="flex items-center gap-2"><FileText className="h-4 w-4 shrink-0 text-primary" /><span className="text-xs font-semibold">{doc.typeLabel ?? doc.type}</span></div><p className="mt-2 max-w-[190px] break-all text-[10px] font-normal text-muted-foreground">{doc.filename}</p></th>
+                  <th scope="row" className="sticky left-0 z-10 border bg-background p-4 text-left"><div className="flex items-center gap-2"><FileText className="h-4 w-4 shrink-0 text-primary" /><span className="text-xs font-semibold">{doc.typeLabel ?? doc.type}</span></div><p className="mt-2 max-w-[190px] break-all text-[10px] font-normal text-muted-foreground">{doc.filename}</p>{doc.status && <p className="mt-1 text-[10px] font-normal text-muted-foreground">{doc.status}{doc.errorCode ? " · " + doc.errorCode : ""}</p>}</th>
                   {filteredMatrix.map(field => { const cell = field.cells.find(item => item.documentId === doc.id) ?? { documentId: doc.id, rawValue: null, normalizedValue: null, source: null }; return <MatrixCellView key={field.fieldKey} cell={cell} fieldStatus={field.status} onClick={() => { if (results.findings.some(f => f.fieldKey === field.fieldKey)) handleCellClick(field); else setSelectedCell({ field, cell }); }} />; })}
                 </tr>)}</tbody>
               </table>
@@ -311,6 +312,7 @@ export default function ValidationResultsPage() {
         </CardContent>
       </Card>
 
+      {results && <CoverageDetails coverage={results.coverage} />}
       {/* Coverage Info */}
       {results && (
         <Card>
@@ -342,7 +344,7 @@ export default function ValidationResultsPage() {
       )}
 
       {/* Finding Detail Panel */}
-      <Dialog open={!!selectedCell} onOpenChange={open => !open && setSelectedCell(null)}><DialogContent><DialogHeader><DialogTitle>{selectedCell?.field.label}</DialogTitle><DialogDescription>Extracted value and source evidence</DialogDescription></DialogHeader><p className="text-sm">{selectedCell?.cell.rawValue ?? "No readable value available. This cell is not a verified match."}</p>{selectedCell?.cell.source ? <div className="space-y-2 text-sm text-muted-foreground"><p>Page {selectedCell.cell.source.page}</p><p>{selectedCell.cell.source.excerpt}</p><p>Confidence: {selectedCell.cell.source.confidence === null ? "Unavailable" : `${Math.round(selectedCell.cell.source.confidence * 100)}%`}</p><p>Recorded by: {selectedCell.cell.source.modelId ?? "Unknown"} {selectedCell.cell.source.modelVersion}</p><p>{selectedCell.cell.source.extractedAt}</p></div> : <p className="text-sm text-muted-foreground">No source evidence is available.</p>}</DialogContent></Dialog>
+      <Dialog open={!!selectedCell} onOpenChange={open => !open && setSelectedCell(null)}><DialogContent><DialogHeader><DialogTitle>{selectedCell?.field.label}</DialogTitle><DialogDescription>Extracted value and source evidence</DialogDescription></DialogHeader><p className="text-sm">{selectedCell?.cell.rawValue ?? "No readable value available. This cell is not a verified match."}</p>{selectedCell?.cell.source ? <div className="space-y-2 text-sm text-muted-foreground"><p>Page {selectedCell.cell.source.pageKnown === false ? "not recorded" : selectedCell.cell.source.page}</p><p>{selectedCell.cell.source.excerpt}</p><p>Confidence: {selectedCell.cell.source.confidence === null ? "Unavailable" : `${Math.round(selectedCell.cell.source.confidence * 100)}%`}</p><p>Recorded by: {selectedCell.cell.source.modelId ?? "Unknown"} {selectedCell.cell.source.modelVersion}</p><p>{selectedCell.cell.source.extractedAt}</p></div> : <p className="text-sm text-muted-foreground">No source evidence is available.</p>}</DialogContent></Dialog>
       <FindingPanel
         finding={selectedFinding}
         open={panelOpen}

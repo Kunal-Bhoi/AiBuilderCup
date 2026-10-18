@@ -1,3 +1,4 @@
+import { ApiError } from "./services/api"
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router-dom"
@@ -9,7 +10,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30000,
-      retry: 1,
+      retry: (count, error) => !(error instanceof ApiError && error.status && error.status >= 400 && error.status < 500) && count < 1,
       refetchOnWindowFocus: false,
     },
   },
