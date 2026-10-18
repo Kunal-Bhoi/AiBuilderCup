@@ -1,0 +1,92 @@
+import { mkdir } from "node:fs/promises";
+import assert from "node:assert/strict";
+const { chromium } = await import(process.env.TRADEGUARD_PLAYWRIGHT ?? "playwright");
+const browser = await chromium.launch({ channel: process.env.TRADEGUARD_BROWSER ?? "msedge", headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true, reducedMotion: "reduce" });
+const page = await context.newPage();
+const errors = [];
+page.on("pageerror", error => errors.push(error.message));
+const base = process.env.TRADEGUARD_URL ?? "http://127.0.0.1:5173";
+const output = "artifacts";
+await mkdir(output, { recursive: true });
+async function visible(locator) { await locator.waitFor({ state: "visible", timeout: 20000 }); }
+async function check(condition, message) { assert.ok(condition, message); console.log("PASS " + message); }
+try {
+  await page.goto(base + "/dashboard");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await visible(page.getByRole("heading", { name: "Dashboard", exact: true }));
+  await visible(page.getByText("TG-2024-00142", { exact: true }));
+  await page.screenshot({ path: output + "/dashboard-desktop.png", fullPage: true });
+  await page.getByText("TG-2024-00142", { exact: true }).click();
+  await visible(page.getByRole("table", { name: "Document validation matrix" }));
+  await check(await page.getByRole("table", { name: "Document validation matrix" }).getByRole("row").count() === 4, "matrix has document rows");
+  await page.getByRole("button", { name: "100 units" }).first().click();
+  await visible(page.getByRole("heading", { name: "Discrepancy Detail" }));
+  await page.getByRole("button", { name: "Review Finding", exact: true }).click();
+  await page.waitForURL("**/review?finding=find-001");
+  await visible(page.locator("canvas").first());
+  await check(await page.locator("canvas").count() === 2, "both original sample PDFs render");
+  await check(await page.getByLabel("Source evidence region").count() === 2, "evidence highlights render on sample PDF pages");
+  await page.screenshot({ path: output + "/review-desktop.png", fullPage: true });
+  await page.goto(base + "/shipments/shp-001/report");
+  await visible(page.getByRole("heading", { name: "Pre-Submission Validation Report", exact: true }));
+  await check(await page.getByRole("button", { name: "Finalise Review", exact: true }).isDisabled(), "pending findings block finalization");
+  await page.goto(base + "/shipments/shp-001/review?finding=find-001");
+  const findingCount = await page.evaluate(() => JSON.parse(localStorage.getItem("tradeguard-demo-v2")).results["shp-001"].findings.length);
+  for (let i = 0; i < findingCount; i++) {
+    await page.getByRole("button", { name: "Review Finding", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Confirm Issue", exact: false }).click();
+    await dialog.getByRole("button", { name: "Submit Review", exact: true }).click();
+    await dialog.waitFor({ state: "hidden" });
+  }
+  await page.getByRole("button", { name: "View Report" }).click();
+  await visible(page.getByRole("button", { name: "Finalise Review", exact: true }));
+  await page.getByRole("button", { name: "Finalise Review", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm Finalise" }).click();
+  await visible(page.getByText("Report Finalised", { exact: true }));
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export PDF", exact: true }).click();
+  await (await download).saveAs(output + "/sample-final-report.pdf");
+  await check(true, "review decisions finalize and export a PDF report");
+  await page.goto(base + "/shipments/new");
+  await visible(page.getByLabel("Shipment reference"));
+  await page.getByLabel("Shipment reference").fill("BROWSER-DEMO-001");
+  await page.getByLabel("Origin country").selectOption("China");
+  await page.getByLabel("Destination country").selectOption("United States");
+  await page.getByRole("button", { name: "Continue to documents" }).click();
+  await page.waitForURL("**/edit");
+  const shipmentId = page.url().split("/").at(-2);
+  await page.getByRole("button", { name: "Use three sample PDFs" }).click();
+  await visible(page.getByRole("button", { name: "Save documents", exact: true }));
+  await page.getByRole("button", { name: "Save documents", exact: true }).click();
+  await visible(page.getByRole("button", { name: /^Preview commercial_invoice/ }));
+  await page.reload();
+  await page.getByRole("button", { name: /^Preview commercial_invoice/ }).click();
+  await visible(page.getByRole("dialog").locator("canvas"));
+  await check(true, "new upload originals survive reload in browser storage");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Start Validation", exact: true }).click();
+  await page.waitForURL("**/processing");
+  await page.reload();
+  await page.waitForURL("**/results", { timeout: 25000 });
+  await visible(page.getByRole("table", { name: "Document validation matrix" }));
+  await check(page.url().includes(shipmentId), "new shipment completes processing across reload");
+  await page.goto(base + "/shipments/shp-004/processing");
+  await visible(page.getByRole("button", { name: "Retry", exact: true }));
+  await page.getByRole("button", { name: "Retry", exact: true }).click();
+  await page.waitForURL("**/results", { timeout: 25000 });
+  await check(true, "failed shipment retry reaches results");
+  for (const route of ["documents", "analytics", "settings", "help"]) {
+    await page.goto(base + "/" + route);
+    await visible(page.getByRole("heading", { level: 1 }));
+    await check(!(await page.getByText("coming soon", { exact: false }).count()), route + " page is functional");
+  }
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto(base + "/dashboard");
+  await visible(page.getByRole("heading", { name: "Dashboard", exact: true }));
+  await page.screenshot({ path: output + "/dashboard-tablet.png", fullPage: true });
+  await check(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "tablet page has no horizontal overflow");
+  await check(errors.length === 0, "no uncaught browser errors: " + errors.join("; "));
+} finally { await browser.close(); }
