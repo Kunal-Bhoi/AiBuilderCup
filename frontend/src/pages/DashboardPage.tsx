@@ -39,6 +39,16 @@ import { hasResults, canEditDocuments } from "@/lib/workflow"
 import { ErrorState } from "@/components/ui/error-state"
 import type { Shipment } from "@/types"
 
+// Theme-aware tooltip box. Recharts gives pie-slice items no colour, so their text
+// falls back to #000 and disappears on the dark background unless itemStyle sets one.
+const chartTooltipStyle: React.CSSProperties = {
+  background: "hsl(var(--popover))",
+  color: "hsl(var(--popover-foreground))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: "8px",
+  fontSize: "12px",
+}
+
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
 interface StatCardProps {
@@ -277,12 +287,8 @@ export default function DashboardPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{
-                    background: "hsl(var(--background))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={chartTooltipStyle}
+                  labelStyle={{ color: "hsl(var(--popover-foreground))" }}
                 />
                 <Area isAnimationActive={false}
                   type="monotone"
@@ -333,12 +339,8 @@ export default function DashboardPage() {
                   wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
                 />
                 <Tooltip
-                  contentStyle={{
-                    background: "hsl(var(--background))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={chartTooltipStyle}
+                  itemStyle={{ color: "hsl(var(--popover-foreground))" }}
                 />
               </PieChart>
             </ResponsiveContainer>
