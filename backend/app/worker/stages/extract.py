@@ -103,13 +103,18 @@ async def _extract_one(ctx: StageContext, doc_id: str, sem: asyncio.Semaphore) -
             )).scalars().all()
             refs = []
             for p in pages[: s.max_pages_per_extract]:
-                url, _ = await ctx.storage.signed_get_url(ctx.storage.object_name(p.gcs_uri), 15 * 60)
-                refs.append(ai.PageRef(page=p.page, image_url=url, width_px=p.width_px, height_px=p.height_px))
+                url = await ctx.page_url(p.gcs_uri)
+                refs.append(ai.PageRef(page=p.page, image_url=url, width_px=p.width_px, height_px=p.height_px,
+                                       storage_uri=p.gcs_uri))
             req = ai.ExtractRequest(
                 request_id=new_id("req"), document_id=doc.id, doc_type=doc.doc_type, pages=refs, text_layer=doc.text_layer,
                 options=ai.ExtractOptions(confidence_floor=s.confidence_floor, max_pages=s.max_pages_per_extract),
             )
             try:
+                if await ctx.budget_exhausted(session):
+                    # Keep partial results: this document is recorded as not read, the others stand.
+                    raise AppError(ErrorCode.TOKEN_BUDGET_EXCEEDED,
+                                   "The model token budget for this run was reached before this document was read.")
                 resp = await ctx.ai.extract(req, doc.filename)
             except AppError as exc:
                 if not exc.retryable:
@@ -144,12 +149,20 @@ async def run(ctx: StageContext) -> None:
         await ctx.progress("RUNNING", completed=completed, total=total)
         return err
 
-    errors = [e for e in await asyncio.gather(*(one(d.id) for d in docs)) if e is not None]
-    retryable = [e for e in errors if e.retryable]
+    results = await asyncio.gather(*(one(d.id) for d in docs))
+    retryable = [(d.id, e) for d, e in zip(docs, results, strict=True) if e is not None and e.retryable]
     if retryable and len(retryable) == len(docs):
-        raise retryable[0]  # nothing extracted and the cause is transient: let the queue retry
+        raise retryable[0][1]  # nothing extracted and the cause is transient: let the queue retry
 
     async with ctx.session() as session:
+        # Others succeeded, so the run proceeds. A transiently failed document is recorded as FAILED
+        # with its code, so coverage lists it as unchecked instead of it silently dropping out.
+        for doc_id, err in retryable:
+            doc = await session.get(Document, doc_id)
+            doc.status, doc.error_code = DocumentStatus.FAILED, err.code.value
+            await ctx.publish(session, "document.failed", {"document_id": doc_id, "error_code": err.code.value,
+                                                            "retryable": True, "message": err.message})
+        await session.commit()
         with_fields = (await session.execute(
             select(func.count(func.distinct(ExtractedField.document_id))).where(
                 ExtractedField.shipment_id == ctx.shipment_id, ExtractedField.run_id == ctx.run_id,

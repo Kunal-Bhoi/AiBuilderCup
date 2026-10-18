@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from app.db.models import Discrepancy, Document, ExtractedField, FieldVerdict
 from app.domain.enums import CellStatus, ExplanationState, Verdict
-from app.errors import AppError
+from app.errors import AppError, ErrorCode
 from app.ids import new_id
 from app.logging import log
 from app.schemas import ai
@@ -41,6 +41,8 @@ async def _explain_one(ctx: StageContext, dsc_id: str, sem: asyncio.Semaphore) -
                             for v in agreed],
         )
         try:
+            if await ctx.budget_exhausted(session):
+                raise AppError(ErrorCode.TOKEN_BUDGET_EXCEEDED, "The model token budget for this run was reached.")
             resp = await ctx.ai.explain(req)
         except AppError as exc:
             d.explanation_state = ExplanationState.UNAVAILABLE

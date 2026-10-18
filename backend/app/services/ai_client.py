@@ -8,7 +8,7 @@ recorded permanent failure."""
 import asyncio
 import random
 import time
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import httpx
 from pydantic import BaseModel, ValidationError
@@ -130,14 +130,20 @@ class StubAIClient:
         return ai_stub.explain(req)
 
 
-_client: HttpAIClient | StubAIClient | None = None
+_client: Any = None
 
 
-def get_ai_client() -> HttpAIClient | StubAIClient:
+def get_ai_client() -> Any:
+    """vertex: Gemini in-process (app/services/ai_vertex.py); http: an external ai-service;
+    stub: the deterministic stand-in. All three expose classify/extract/reconcile/explain."""
     global _client
     if _client is None:
         s = get_settings()
-        if s.ai_mode == "http":
+        if s.ai_mode == "vertex":
+            from app.services.ai_vertex import VertexAIClient
+
+            _client = VertexAIClient()
+        elif s.ai_mode == "http":
             if not s.ai_service_url:
                 raise RuntimeError("AI_SERVICE_URL is required when AI_MODE=http")
             _client = HttpAIClient(s.ai_service_url, s.ai_timeout_seconds)

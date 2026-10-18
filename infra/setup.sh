@@ -2,7 +2,7 @@
 # One-time GCP setup for the backend. Idempotent: safe to re-run.
 # Requires: gcloud logged in, billing linked to the project.
 #
-#   PROJECT=tradeit-511910 ./infra/setup.sh
+#   PROJECT=aibuildercup-512008 ./infra/setup.sh
 set -euo pipefail
 
 PROJECT="${PROJECT:?set PROJECT}"
@@ -22,7 +22,8 @@ exists() { "$@" >/dev/null 2>&1; }
 echo "== APIs"
 gc services enable run.googleapis.com sqladmin.googleapis.com cloudtasks.googleapis.com cloudkms.googleapis.com \
   storage.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com iamcredentials.googleapis.com \
-  secretmanager.googleapis.com identitytoolkit.googleapis.com firebase.googleapis.com logging.googleapis.com
+  secretmanager.googleapis.com identitytoolkit.googleapis.com firebase.googleapis.com logging.googleapis.com \
+  aiplatform.googleapis.com
 
 echo "== Service accounts"
 for sa in api-sa worker-sa; do
@@ -40,6 +41,9 @@ for sa in "$API_SA" "$WORKER_SA"; do
   gc iam service-accounts add-iam-policy-binding "$sa" --member "serviceAccount:$sa" \
     --role roles/iam.serviceAccountTokenCreator -q >/dev/null
 done
+# Gemini runs inside the worker (AI_MODE=vertex); only the worker calls Vertex AI.
+gc projects add-iam-policy-binding "$PROJECT" --member "serviceAccount:$WORKER_SA" --role roles/aiplatform.user \
+  --condition=None -q >/dev/null
 # Cloud Tasks mints OIDC tokens as worker-sa; both services enqueue tasks, so both may act as it.
 for sa in "$API_SA" "$WORKER_SA"; do
   gc iam service-accounts add-iam-policy-binding "$WORKER_SA" --member "serviceAccount:$sa" \

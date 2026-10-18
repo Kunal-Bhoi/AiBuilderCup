@@ -5,3 +5,4 @@ __pycache__/
 .env
 .pytest_cache/
 samples/out/
+eval/out/

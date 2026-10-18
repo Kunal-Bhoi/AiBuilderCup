@@ -26,6 +26,9 @@ class PageRef(_M):
     image_url: str
     width_px: int
     height_px: int
+    # In-process modes (stub, vertex) read the rendered page directly from storage with this;
+    # an external ai-service uses image_url. Additive, so the HTTP shape is unchanged for it.
+    storage_uri: str | None = None
 
 
 # ---- classify (DRAFT) ----

@@ -27,10 +27,11 @@ async def run(ctx: StageContext) -> None:
                 first = (await session.execute(
                     select(DocumentPage).where(DocumentPage.document_id == d.id).order_by(DocumentPage.page).limit(1)
                 )).scalar_one()
-                url, _ = await ctx.storage.signed_get_url(ctx.storage.object_name(first.gcs_uri), 15 * 60)
+                url = await ctx.page_url(first.gcs_uri)
                 items.append(ai.ClassifyDocumentIn(
                     document_id=d.id, filename=d.filename, page_count=d.page_count or 1,
-                    pages=[ai.PageRef(page=1, image_url=url, width_px=first.width_px, height_px=first.height_px)],
+                    pages=[ai.PageRef(page=1, image_url=url, width_px=first.width_px, height_px=first.height_px,
+                                      storage_uri=first.gcs_uri)],
                     text_layer_excerpt=(d.text_layer or "")[:2000] or None,
                 ))
             result = await ctx.ai.classify(ai.ClassifyRequest(request_id=new_id("req"), documents=items))

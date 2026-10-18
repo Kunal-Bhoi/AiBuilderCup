@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings, get_settings
@@ -36,6 +36,14 @@ class StageContext:
     @property
     def storage(self):
         return get_storage()
+
+    async def page_url(self, gcs_uri: str) -> str:
+        """URL the AI service fetches a page from. Only an external ai-service (AI_MODE=http) needs a
+        signed URL; in-process modes read storage_uri directly, which saves a signBlob call per page."""
+        if self.settings.ai_mode != "http":
+            return gcs_uri
+        url, _ = await self.storage.signed_get_url(self.storage.object_name(gcs_uri), 15 * 60)
+        return url
 
     def session(self) -> AsyncSession:
         return sessionmaker()()
@@ -71,6 +79,18 @@ class StageContext:
             input_tokens=usage.input_tokens, output_tokens=usage.output_tokens, cost_usd=cost_usd(usage),
             latency_ms=usage.latency_ms, outcome=outcome,
         ))
+
+    async def budget_exhausted(self, session: AsyncSession) -> bool:
+        """True once this run's recorded model tokens reach TOKEN_BUDGET_PER_RUN (AI-SPEC §12.3).
+        Checked before each billable call; calls already in flight finish, so it is a soft ceiling."""
+        run = await session.get(AnalysisRun, self.run_id)
+        if run is None:
+            return False
+        used = (await session.execute(
+            select(func.coalesce(func.sum(ModelInvocation.input_tokens + ModelInvocation.output_tokens), 0))
+            .where(ModelInvocation.shipment_id == self.shipment_id, ModelInvocation.occurred_at >= run.created_at)
+        )).scalar_one()
+        return used >= self.settings.token_budget_per_run
 
     async def shipment(self, session: AsyncSession) -> Shipment:
         return (await session.execute(

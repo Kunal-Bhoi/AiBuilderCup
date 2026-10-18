@@ -12,3 +12,4 @@ tests/
 # Buildpacks install from requirements.txt (regenerate with: uv export --no-dev --no-hashes --no-emit-project -o requirements.txt)
 pyproject.toml
 uv.lock
+eval/

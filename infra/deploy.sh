@@ -2,8 +2,8 @@
 # Deploy worker-service and api-service from source (Cloud Build + Google Cloud buildpacks;
 # no Dockerfile, no local Docker), then run migrations as a Cloud Run Job.
 #
-#   PROJECT=tradeit-511910 ./infra/deploy.sh
-#   AI_MODE=http AI_SERVICE_URL=https://ai-service-xxxx.a.run.app AUTH_MODE=firebase PROJECT=... ./infra/deploy.sh
+#   PROJECT=aibuildercup-512008 ./infra/deploy.sh
+#   GEMINI_MODEL=... VERTEX_LOCATION=... PROJECT=aibuildercup-512008 ./infra/deploy.sh
 set -euo pipefail
 
 PROJECT="${PROJECT:?set PROJECT}"
@@ -13,8 +13,12 @@ SQL_INSTANCE="${SQL_INSTANCE:-tradecheck-pg}"
 QUEUE="${QUEUE:-pipeline}"
 KEYRING="${KEYRING:-tradecheck}"
 KEY="${KEY:-report-signing}"
-AI_MODE="${AI_MODE:-stub}"
+AI_MODE="${AI_MODE:-vertex}"                  # Gemini in-process in the worker; "stub" for a no-LLM deploy
 AI_SERVICE_URL="${AI_SERVICE_URL:-}"
+VERTEX_LOCATION="${VERTEX_LOCATION:-global}"
+GEMINI_MODEL="${GEMINI_MODEL:-gemini-3.8-flash}"
+GEMINI_MODEL_CLASSIFY="${GEMINI_MODEL_CLASSIFY:-}"
+GEMINI_API="${GEMINI_API:-interactions}"      # or generate_content
 AUTH_MODE="${AUTH_MODE:-dev}"
 ORIGINS="${ALLOWED_ORIGINS:-*}"
 API_MIN_INSTANCES="${API_MIN_INSTANCES:-0}"   # set to 1 on judging day
@@ -30,6 +34,7 @@ common_env() {
   echo "^;^ENVIRONMENT=prod;GCP_PROJECT=$PROJECT;GCP_REGION=$REGION;GCS_BUCKET=$BUCKET;STORAGE_MODE=gcs;\
 CLOUD_SQL_INSTANCE=$CONN;DB_USER=tradecheck;DB_NAME=tradecheck;TASKS_MODE=cloudtasks;TASKS_QUEUE=$QUEUE;\
 TASKS_SERVICE_ACCOUNT=$WORKER_SA;AI_MODE=$AI_MODE;AI_SERVICE_URL=$AI_SERVICE_URL;AUTH_MODE=$AUTH_MODE;\
+VERTEX_LOCATION=$VERTEX_LOCATION;GEMINI_MODEL=$GEMINI_MODEL;GEMINI_MODEL_CLASSIFY=$GEMINI_MODEL_CLASSIFY;GEMINI_API=$GEMINI_API;\
 FIREBASE_PROJECT=$PROJECT;SIGNING_MODE=kms;KMS_KEY_VERSION=$KMS_VERSION;ALLOWED_ORIGINS=$ORIGINS;$1"
 }
 

@@ -25,6 +25,7 @@ dependencies = [
   "reportlab>=4.2",
   "cryptography>=43",
   "openpyxl>=3.1.5",
+  "google-genai>=2.31.0",
 ]
 
 [dependency-groups]

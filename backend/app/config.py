@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # Modes
     auth_mode: Literal["firebase", "dev"] = "dev"
-    ai_mode: Literal["http", "stub"] = "stub"
+    ai_mode: Literal["vertex", "http", "stub"] = "stub"
     tasks_mode: Literal["cloudtasks", "inline", "sync"] = "inline"
     storage_mode: Literal["gcs", "local"] = "local"
     signing_mode: Literal["kms", "local"] = "local"
@@ -43,6 +43,15 @@ class Settings(BaseSettings):
     ai_service_url: str | None = None
     ai_timeout_seconds: float = 120.0
     ai_stub_fixtures_dir: str = "../contracts/fixtures/ai"
+
+    # Vertex AI (AI_MODE=vertex): Gemini runs inside the worker, see app/services/llm.py
+    vertex_location: str = "global"  # separate from gcp_region; the model may not be served regionally
+    gemini_model: str = "gemini-3.8-flash"
+    gemini_model_classify: str | None = None  # cheaper tier for classification; defaults to gemini_model
+    gemini_api: Literal["interactions", "generate_content"] = "interactions"
+    gemini_thinking_level: str | None = None  # never combined with a thinking budget (400 on Gemini 3)
+    gemini_max_output_tokens: int = 16384
+    token_budget_per_run: int = 400_000
 
     # Local fallbacks
     local_storage_dir: str = ".local/storage"

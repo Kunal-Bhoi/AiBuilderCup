@@ -30,6 +30,7 @@ class ErrorCode(StrEnum):
     MODEL_RATE_LIMITED = "MODEL_RATE_LIMITED"
     MODEL_SAFETY_BLOCK = "MODEL_SAFETY_BLOCK"
     MODEL_MALFORMED_OUTPUT = "MODEL_MALFORMED_OUTPUT"
+    MODEL_REQUEST_REJECTED = "MODEL_REQUEST_REJECTED"
     TOKEN_BUDGET_EXCEEDED = "TOKEN_BUDGET_EXCEEDED"
     INSUFFICIENT_DOCUMENTS = "INSUFFICIENT_DOCUMENTS"
     INTERNAL = "INTERNAL"
@@ -55,6 +56,9 @@ ERROR_TABLE: dict[ErrorCode, tuple[int, bool]] = {
     ErrorCode.MODEL_RATE_LIMITED: (429, True),
     ErrorCode.MODEL_SAFETY_BLOCK: (422, False),
     ErrorCode.MODEL_MALFORMED_OUTPUT: (502, True),
+    # Permission, quota-project or configuration problems (e.g. the Vertex AI API is not
+    # enabled). Retrying cannot fix them, so they fail fast instead of burning task attempts.
+    ErrorCode.MODEL_REQUEST_REJECTED: (502, False),
     ErrorCode.TOKEN_BUDGET_EXCEEDED: (429, False),
     ErrorCode.INSUFFICIENT_DOCUMENTS: (422, False),
     ErrorCode.INTERNAL: (500, True),

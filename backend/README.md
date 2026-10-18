@@ -53,11 +53,11 @@ The defaults are all local modes: `AUTH_MODE=dev`, `AI_MODE=stub`, `TASKS_MODE=i
 ## Deploy to GCP
 
 ```bash
-PROJECT=tradeit-511910 ./infra/setup.sh     # once: APIs, service accounts, bucket+CORS, Cloud SQL, Tasks queue, KMS key
-PROJECT=tradeit-511910 ./infra/deploy.sh    # worker → migrations job → api; prints the api URL
+PROJECT=aibuildercup-512008 ./infra/setup.sh     # once: APIs, service accounts, bucket+CORS, Cloud SQL, Tasks queue, KMS key
+PROJECT=aibuildercup-512008 ./infra/deploy.sh    # worker → migrations job → api; prints the api URL
 # when the AI service and Firebase are ready:
 AI_MODE=http AI_SERVICE_URL=https://ai-service-....run.app AUTH_MODE=firebase \
-  ALLOWED_ORIGINS=https://<frontend-origin> PROJECT=tradeit-511910 ./infra/deploy.sh
+  ALLOWED_ORIGINS=https://<frontend-origin> PROJECT=aibuildercup-512008 ./infra/deploy.sh
 ```
 
 Grant the worker's service account `roles/run.invoker` on ai-service. Set `API_MIN_INSTANCES=1` on judging day so the first request doesn't hit a cold start.
@@ -71,7 +71,19 @@ Grant the worker's service account `roles/run.invoker` on ai-service. Set `API_M
 - **Discrepancies.** `GET /shipments/{id}/discrepancies` returns only open (undecided) findings. Add `?include_decided=true` for all of them.
 - **Health.** Use `/health`. Cloud Run's front end can intercept paths ending in `z`, so `/healthz` may not reach the app there.
 
-## Notes for the AI service
+## AI on Vertex AI (`AI_MODE=vertex`)
+
+Gemini runs inside the worker; there is no separate AI service. See `app/services/llm.py` (model access, retries, error mapping) and `app/services/ai_vertex.py` (classify, extract, explain). Verdicts come from `app/services/rules.py`, never from the model. Verify the live path once Vertex AI is enabled:
+
+```bash
+gcloud auth application-default login
+GCP_PROJECT=aibuildercup-512008 AI_MODE=vertex uv run python scripts/vertex_smoke.py
+AI_MODE=vertex GCP_PROJECT=aibuildercup-512008 uv run python scripts/evaluate.py   # accuracy, false agreement, cost
+```
+
+Settings: `VERTEX_LOCATION` (default `global`), `GEMINI_MODEL` (default `gemini-3.8-flash`), `GEMINI_MODEL_CLASSIFY`, `GEMINI_API` (`interactions` or `generate_content`), `GEMINI_THINKING_LEVEL`, `TOKEN_BUDGET_PER_RUN`.
+
+## Notes for an external AI service (`AI_MODE=http`)
 
 Only `/ai/v1/extract` is pinned by the spec. The classify, reconcile and explain shapes the backend sends and parses are drafts, defined in [app/schemas/ai.py](app/schemas/ai.py). Example request/response pairs are in [contracts/fixtures/ai/examples/](../contracts/fixtures/ai/examples/); regenerate them with `scripts/export_ai_fixtures.py`. Errors should use the §7 envelope, because the worker maps the `code` and `retryable` fields. [app/services/ai_stub.py](app/services/ai_stub.py) is a deterministic stand-in for the AI service:
 - extract: a text-layer parser.
