@@ -46,7 +46,7 @@ export default function ProcessingPage() {
   useEffect(() => {
     if (
       processing?.shipmentStatus === "ready_for_review" ||
-      processing?.shipmentStatus === "finalized"
+      (processing?.shipmentStatus === "finalized" || processing?.shipmentStatus === "reviewed")
     ) {
       qc.invalidateQueries({ queryKey: ["shipments"] })
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] })
@@ -63,7 +63,7 @@ export default function ProcessingPage() {
 
   const isComplete =
     processing?.shipmentStatus === "ready_for_review" ||
-    processing?.shipmentStatus === "finalized"
+    (processing?.shipmentStatus === "finalized" || processing?.shipmentStatus === "reviewed")
 
   const isFailed = processing?.shipmentStatus === "failed"
 
@@ -199,8 +199,7 @@ export default function ProcessingPage() {
             <div className="flex-1">
               <p className="text-sm font-medium text-destructive">Validation Failed</p>
               <p className="text-xs text-muted-foreground mt-1">
-                The AI pipeline encountered an error. This may be due to unsupported document formats or
-                illegible document content. Please review your uploaded files and try again.
+                {processing?.errorMessage ?? "Analysis failed. Review the uploaded documents and retry."}
               </p>
               <div className="mt-3 flex gap-2">
                 <Button

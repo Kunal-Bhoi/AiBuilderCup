@@ -34,6 +34,8 @@ import { ShipmentStatusBadge } from "@/components/ui/status-badges"
 import { CardSkeleton, TableSkeleton } from "@/components/ui/skeleton"
 import { useShipments, useDashboardStats } from "@/hooks/useShipments"
 import { formatDate, formatDateTime } from "@/lib/utils"
+import { USE_MOCK } from "@/services/shipmentService"
+import { hasResults, canEditDocuments } from "@/lib/workflow"
 import { ErrorState } from "@/components/ui/error-state"
 import type { Shipment } from "@/types"
 
@@ -88,12 +90,12 @@ function ShipmentRow({ shipment, onClick }: { shipment: Shipment; onClick: () =>
           </span>
         </div>
       </td>
-      <td className="py-3 px-4 text-sm text-muted-foreground">{shipment.originCountry}</td>
-      <td className="py-3 px-4 text-sm text-muted-foreground">{shipment.destinationCountry}</td>
+      <td className="py-3 px-4 text-sm text-muted-foreground">{shipment.originCountry || "—"}</td>
+      <td className="py-3 px-4 text-sm text-muted-foreground">{shipment.destinationCountry || "—"}</td>
       <td className="py-3 px-4">
-        <span className="text-sm">{shipment.documents.length}</span>
+        <span className="text-sm">{(shipment.documentCount ?? shipment.documents.length)}</span>
         <span className="text-xs text-muted-foreground ml-1">
-          {shipment.documents.length === 1 ? "doc" : "docs"}
+          {(shipment.documentCount ?? shipment.documents.length) === 1 ? "doc" : "docs"}
         </span>
       </td>
       <td className="py-3 px-4">
@@ -159,7 +161,7 @@ export default function DashboardPage() {
     {
       title: "Total Shipments",
       value: stats?.totalShipments ?? 0,
-      description: "All time",
+      description: "All saved shipments",
       icon: Package,
       iconClass: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
     },
@@ -186,7 +188,7 @@ export default function DashboardPage() {
 
     },
     {
-      title: "Total Discrepancies",
+      title: USE_MOCK ? "Total Discrepancies" : "Open Findings",
       value: stats?.totalDiscrepancies ?? 0,
       description: "Across all shipments",
       icon: XCircle,
@@ -195,23 +197,23 @@ export default function DashboardPage() {
   ]
 
   const handleRowClick = (shipment: Shipment) => {
-    if (shipment.status === "ready_for_review" || shipment.status === "finalized") {
+    if (hasResults(shipment.status)) {
       navigate(`/shipments/${shipment.id}/results`)
     } else if (shipment.status === "processing" || shipment.status === "queued") {
       navigate(`/shipments/${shipment.id}/processing`)
     } else if (shipment.status === "failed") {
       navigate(`/shipments/${shipment.id}/processing`)
-    } else if (shipment.status === "draft") {
+    } else if (canEditDocuments(shipment.status)) {
       navigate(`/shipments/${shipment.id}/edit`)
-    }
+    } else { navigate(`/shipments/${shipment.id}/results`) }
   }
 
   const activity = Array.from({ length: 7 }, (_, index) => {
     const day = new Date(); day.setHours(0, 0, 0, 0); day.setDate(day.getDate() - (6 - index));
-    const records = (shipments ?? []).filter(shipment => shipment.validatedAt && new Date(shipment.validatedAt).toDateString() === day.toDateString());
+    const records = (shipments ?? []).filter(shipment => new Date(shipment.createdAt).toDateString() === day.toDateString());
     return { name: day.toLocaleDateString("en", { weekday: "short" }), validated: records.length, discrepancies: records.reduce((sum, shipment) => sum + shipment.discrepancyCount, 0) };
   });
-  const distribution = [{ name: "Draft", status: "draft", color: "#94a3b8" }, { name: "Queued", status: "queued", color: "#eab308" }, { name: "Processing", status: "processing", color: "#3b82f6" }, { name: "Needs review", status: "ready_for_review", color: "#f97316" }, { name: "Finalized", status: "finalized", color: "#22c55e" }, { name: "Failed", status: "failed", color: "#ef4444" }].map(item => ({ ...item, value: (shipments ?? []).filter(shipment => shipment.status === item.status).length })).filter(item => item.value > 0);
+  const distribution = [{ name: "Uploading", status: "uploading", color: "#60a5fa" }, { name: "Reviewed", status: "reviewed", color: "#06b6d4" }, { name: "Archived", status: "archived", color: "#64748b" }, { name: "Draft", status: "draft", color: "#94a3b8" }, { name: "Queued", status: "queued", color: "#eab308" }, { name: "Processing", status: "processing", color: "#3b82f6" }, { name: "Needs review", status: "ready_for_review", color: "#f97316" }, { name: "Finalized", status: "finalized", color: "#22c55e" }, { name: "Failed", status: "failed", color: "#ef4444" }].map(item => ({ ...item, value: (shipments ?? []).filter(shipment => shipment.status === item.status).length })).filter(item => item.value > 0);
   if (error) return <ErrorState error={error} retry={() => refetch()} />;
   return (
     <div className="p-6 space-y-6 animate-fade-in-up">
@@ -249,8 +251,8 @@ export default function DashboardPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Validation Activity</CardTitle>
-                <CardDescription>Shipments validated vs discrepancies found (last 7 days)</CardDescription>
+                <CardTitle>Shipment Activity</CardTitle>
+                <CardDescription>Shipments created each day and their current findings</CardDescription>
               </div>
               <Badge variant="secondary" className="gap-1">
                 <ArrowUpRight className="h-3 w-3" />
@@ -285,7 +287,7 @@ export default function DashboardPage() {
                 <Area isAnimationActive={false}
                   type="monotone"
                   dataKey="validated"
-                  name="Validated"
+                  name="Shipments created"
                   stroke="hsl(221, 83%, 53%)"
                   strokeWidth={2}
                   fill="url(#validatedGrad)"
@@ -293,7 +295,7 @@ export default function DashboardPage() {
                 <Area isAnimationActive={false}
                   type="monotone"
                   dataKey="discrepancies"
-                  name="Discrepancies"
+                  name="Current findings"
                   stroke="#ef4444"
                   strokeWidth={2}
                   fill="url(#discrepancyGrad)"
@@ -370,7 +372,7 @@ export default function DashboardPage() {
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
               >
                 <option value="all">All statuses</option>
-                <option value="draft">Draft</option>
+                <option value="draft">Draft</option><option value="uploading">Uploading</option><option value="reviewed">Reviewed</option><option value="archived">Archived</option>
                 <option value="queued">Queued</option>
                 <option value="processing">Processing</option>
                 <option value="ready_for_review">Ready for Review</option>
@@ -466,7 +468,7 @@ export default function DashboardPage() {
 
       {/* Last Updated */}
       <p className="text-xs text-muted-foreground text-center">
-        Last updated: {formatDateTime(new Date().toISOString())} · Data is for demonstration purposes
+        Last updated: {formatDateTime(new Date().toISOString())} · {USE_MOCK ? "Demonstration data" : "Loaded from the backend"}
       </p>
     </div>
   )

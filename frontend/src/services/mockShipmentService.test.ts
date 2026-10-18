@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.stubGlobal("localStorage", { getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => data.set(key, value), removeItem: (key: string) => data.delete(key) });
   vi.restoreAllMocks();
 });
-const payload = { reference: "TEST-001", originCountry: "India", destinationCountry: "Germany", preferentialDutyClaim: false };
+const payload = { reference: "TEST-001" };
 const completeProcessing = async (id: string) => {
   const now = Date.now();
   const clock = vi.spyOn(Date, "now").mockReturnValue(now + 11000);
@@ -41,7 +41,7 @@ describe("demo workflow and review safeguards", () => {
   it("rejects duplicate references and invalid routing", async () => {
     await service.createShipment(payload);
     await expect(service.createShipment(payload)).rejects.toThrow("already exists");
-    await expect(service.createShipment({ ...payload, reference: "other", destinationCountry: "India" })).rejects.toThrow("different countries");
+    await expect(service.createShipment({ reference: " " })).rejects.toThrow("reference");
   });
   it("cannot start an empty shipment or finalize a draft", async () => {
     const shipment = await service.createShipment(payload);
@@ -59,7 +59,7 @@ describe("demo workflow and review safeguards", () => {
     const shipment = await service.createShipment(payload);
     await expect(service.uploadDocuments(shipment.id, [new File(["x"], "test.exe")])).rejects.toThrow("non-empty");
     await expect(service.uploadDocuments(shipment.id, [new File([], "empty.pdf")])).rejects.toThrow("non-empty");
-    await expect(service.uploadDocuments(shipment.id, [new File([new Uint8Array(20 * 1024 * 1024 + 1)], "large.pdf")])).rejects.toThrow("20 MB");
+    await expect(service.uploadDocuments(shipment.id, [new File([new Uint8Array(50 * 1024 * 1024 + 1)], "large.pdf")])).rejects.toThrow("50 MB");
   });
   it("completes processing with uploaded document IDs and consistent report data", async () => {
     const shipment = await service.createShipment(payload);
@@ -78,13 +78,13 @@ describe("demo workflow and review safeguards", () => {
     expect((await service.getValidationResults("shp-004")).summary.matched).toBe(0);
   });
   it("requires an override explanation and blocks pending finalization", async () => {
-    await expect(service.reviewFinding("shp-001", "find-001", { decision: "override_finding", reason: "ok" })).rejects.toThrow("10 characters");
+    await expect(service.reviewFinding("shp-001", "find-001", { decision: "DISMISS_AS_NOT_AN_ISSUE", reason: "ok" })).rejects.toThrow("10 characters");
     await expect(service.finalizeReview("shp-001")).rejects.toThrow("every finding");
   });
   it("records decisions without erasing discrepancies and locks finalized reviews", async () => {
     const results = await service.getValidationResults("shp-001");
     const before = (await service.getShipment("shp-001")).discrepancyCount;
-    for (const finding of results.findings) await service.reviewFinding("shp-001", finding.id, { decision: "confirm_issue" });
+    for (const finding of results.findings) await service.reviewFinding("shp-001", finding.id, { decision: "FLAG_FOR_FOLLOW_UP" });
     expect((await service.getReport("shp-001")).canFinalize).toBe(true);
     expect((await service.getShipment("shp-001")).discrepancyCount).toBe(before);
     await service.finalizeReview("shp-001");
@@ -92,6 +92,6 @@ describe("demo workflow and review safeguards", () => {
     expect(report.pendingReviews).toBe(0);
     expect(report.results.status).toBe("finalized");
     expect(report.reviewerDecisions).toHaveLength(results.findings.length);
-    await expect(service.reviewFinding("shp-001", "find-001", { decision: "confirm_issue" })).rejects.toThrow("locked");
+    await expect(service.reviewFinding("shp-001", "find-001", { decision: "FLAG_FOR_FOLLOW_UP" })).rejects.toThrow("locked");
   });
 });

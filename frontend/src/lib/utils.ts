@@ -15,6 +15,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
 }
 
 export function formatDate(dateString: string): string {
+  if (!dateString || Number.isNaN(new Date(dateString).getTime())) return "Not available"
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -23,6 +24,7 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatDateTime(dateString: string): string {
+  if (!dateString || Number.isNaN(new Date(dateString).getTime())) return "Not available"
   return new Date(dateString).toLocaleString("en-US", {
     year: "numeric",
     month: "short",

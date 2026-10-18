@@ -1,10 +1,12 @@
-# TradeGuard AI
+# TradeGuard frontend
 
-A runnable React frontend for reviewing trade documents before customs submission. Built with Vite, TypeScript, Tailwind, shadcn-style Radix components, React Router, Axios, TanStack Query, React-PDF, Recharts, and jsPDF.
+React, Vite, and TypeScript frontend connected to the existing backend in ../backend. Backend source and shared contracts are unchanged.
 
-## Run locally
+## Run against the backend
 
-Tested with Node.js 24 and npm 10.
+Start the backend on port 8080 using its [run instructions](../backend/README.md#run-locally-no-docker).
+
+In a separate terminal, from the repository root:
 
 ```powershell
 cd frontend
@@ -14,68 +16,99 @@ npm run dev
 
 Open the address printed by Vite, normally http://localhost:5173.
 
-No backend or API key is needed for the demo.
+The default is connected mode. Vite forwards /api requests to http://localhost:8080, so no frontend environment file is required for local development. The connection check and session settings are under Settings.
 
-## Try the complete demo
+The backend's local defaults use development identity and simulated model processing. Connecting this frontend does not change the backend's model-service configuration.
 
-1. Open the first shipment to compare three sample documents: 100 / 95 / 100 units and 500 / 480 / 500 kg.
-2. Select a table value to inspect its evidence or finding.
-3. Review findings. Overrides need a reason of at least 10 characters.
-4. Open the report. Finalisation remains disabled until every finding has a decision.
-5. Finalise and export a PDF, or print the report.
-6. To start fresh, choose New Shipment, enter two different countries, and use the three sample PDFs or your own files.
+## Workflow
 
-Draft shipments can be reopened from the dashboard. Failed shipments support retry. Document removal and replacement are available before validation; remove the old file and add its replacement.
+1. Create a shipment using its reference. The existing backend does not store extra country or duty fields on shipment creation; those can be extracted from the uploaded documents.
+2. Add up to 20 documents, each up to 50 MB. Files upload to the temporary storage links returned by the backend, then register with the shipment.
+3. Correct document types if necessary and start validation. The processing screen follows the backend's current run.
+4. Review the document matrix, missing documents, uncertain values, and fields outside coverage.
+5. Record a decision for every finding. Accept a suggestion, override a value using a selected document or corrected value, flag for follow-up, or dismiss with a reason.
+6. If someone else changed a finding, review the refreshed values before retrying. The frontend sends the current record version with each decision.
+7. Issue the report when the backend marks the review complete. The server generates and signs the PDF; the frontend downloads it from the returned temporary link.
 
-## What the demo does
+Document previews use the backend's rendered page images. This works for supported PDFs, images, and spreadsheets after ingestion. Original-file download is not exposed by this backend, so the connected viewer does not claim to download original files.
 
-- Shipment metadata, results, and decisions persist in localStorage, the browser's small settings store.
-- Original uploaded files persist in IndexedDB, the browser's local file database.
-- Processing follows saved timestamps, so navigation or a reload does not stop it.
-- Results use the predefined steel-pipes example. Your files are **not analysed** and their names do not determine document type.
-- Seeded documents open as generated sample PDFs. Their highlights line up with the recorded sample evidence. Uploaded originals remain available, but fabricated highlights are never placed on them.
-- Missing values cannot appear as verified matches. A field needs at least two readable sources for a cross-document match. Summary counts come from the displayed fields.
-- Reviewing an issue records a decision; it does not erase a discrepancy. Finalisation locks the review and does not mean the goods are cleared or corrections have been completed.
-- Request Correction records a local decision. It sends no message to the shipper.
-- The settings page can reset demo shipment records. Browser storage is local to this browser and origin (address plus port).
-- PDF, PNG, JPG, and XLSX files are accepted, up to 20 MB each. XLSX originals can be downloaded; spreadsheet cell rendering is not included.
+Re-analysis is available before a report is issued. Issued reports lock document and decision changes according to the backend's rules.
 
-## Backend connection status
+## Connection and identity
 
-The existing backend is in [`../backend/`](../backend/), with its interface described in [`../contracts/openapi.yaml`](../contracts/openapi.yaml). These existing folders have not been changed.
+Copy .env.example to .env only if you need to override settings.
 
-This frontend runs in demo mode by default (`VITE_USE_MOCK=true`). Its HTTP adapter still follows the original frontend brief and has not yet been connected to this repository's backend. Switching the flag alone will not connect the two.
+| Setting | Purpose |
+|---|---|
+| VITE_USE_MOCK | false connects to the backend; true runs the standalone demo |
+| VITE_API_BASE_URL | /api/v1 locally, or the full backend address ending in /api/v1 |
+| VITE_PROXY_TARGET | Backend address for the development proxy; defaults to http://localhost:8080 |
+| VITE_AUTH_MODE | dev for the local development account; firebase for Firebase ID tokens |
 
-A later frontend-only integration needs to adapt signed-URL uploads, `/analyze`, `/matrix`, `/discrepancies`, decision submission, and report endpoints. See the backend's [frontend notes](../backend/README.md#notes-for-the-frontend). The backend's documented local port is 8080.
+Restart Vite after changing environment variables.
 
-`.env.example` contains the original connection settings for reference. Variables starting with VITE_ are public browser configuration; put no secret keys in them.
+In development mode, Settings controls X-Dev-User, X-Dev-Org, and X-Dev-Role. These match the backend's documented local mode. The server still enforces all role restrictions.
+
+For a backend using Firebase, set VITE_AUTH_MODE=firebase. Settings accepts an ID token from your existing Firebase sign-in provider; it does not create accounts or implement a separate login provider. Tokens stay in sessionStorage, the current browser tab's session store, and need replacing when expired. The backend verifies the token and authorises every request. Viewer controls cannot issue reports or save review decisions.
+
+The frontend never forwards authentication headers to temporary file-storage links.
+
+For a production build, configure VITE_API_BASE_URL to the deployed backend, or configure the web host to forward /api to it. Vite's development proxy is not included in production builds. The backend and storage service must allow the frontend's browser origin. All VITE_ variables are public; they must contain no secret model or service keys.
+
+## Standalone demo
+
+To run the sample data without a backend:
+
+```powershell
+$env:VITE_USE_MOCK='true'
+npm run dev
+```
+
+The demo keeps metadata in localStorage and original files in IndexedDB, the browser's local file database. Values come from predefined examples and do not analyse the contents of your files.
 
 ## Checks
 
 ```powershell
+npm run check:api
 npm run build
 npm run lint
 npm test
 ```
 
-The automated tests cover file rules, source IDs, coverage totals, processing, retry, review reasons, blocked finalisation, locked reports, and the HTTP adapter.
+API types in src/types/backend.generated.ts are generated from ../contracts/openapi.yaml. After an intentional backend contract update, run npm run generate:api.
 
-A complete browser walkthrough is included. Start the frontend first; on Windows with Edge installed, run:
+The unit tests cover real backend response shapes, all shipment states, signed uploads, coverage, uncertain cells, source coordinates, review versions, report downloads, and demo state.
+
+For browser tests against backend-model-validated response fixtures, start connected mode on port 5175:
 
 ```powershell
-npm run test:browser
+npm run dev -- --port 5175
 ```
 
-It uses a temporary browser profile and saves screenshots and an exported report in `artifacts/`. It does not change the data in your normal browser. To use a different server address, set TRADEGUARD_URL before running it. For Chromium instead of Edge, run `npx playwright install chromium` and set TRADEGUARD_BROWSER=chromium.
+In another terminal:
 
-## Code map
+```powershell
+npm run test:browser:backend
+```
 
-- `src/pages/`: the six main screens, document library, settings, and help.
-- `src/components/`: shared layout, controls, PDF/image viewer, and status badges.
-- `src/hooks/useShipments.ts`: cached requests and changes shared between screens.
-- `src/services/`: backend connection, local demo repository, file storage, and sample PDF generation.
-- `src/mocks/`: predefined examples, kept separate from interface code.
-- `src/lib/`: formatting, result summaries, report data, and PDF export.
-- `src/types/`: the data shapes shared with the backend.
+This test intercepts server responses in a temporary browser profile. It exercises the whole interface without a database, including concurrent review errors and report issue/download. It is a contract test, not proof that a deployed backend is available. Screenshots, the downloaded PDF, and captured request bodies are saved in artifacts/.
 
-Use `npm run build` to create `dist/`, then `npm run preview` to inspect it. A web host must serve index.html for application routes such as /shipments/shp-001/results.
+The fixture responses and captured requests can also be validated by the actual backend data models, using a Python environment with the backend dependencies installed:
+
+```powershell
+python scripts/validate-backend-contract.py artifacts/backend-browser-requests.json
+```
+
+For the standalone demo walkthrough, start a demo server and run npm run test:browser. Set TRADEGUARD_URL if the test server is not on its script's default port. Browser tests use Edge on Windows. For Chromium, install it with npx playwright install chromium and set TRADEGUARD_BROWSER=chromium.
+
+## Source map
+
+- src/services/shipmentService.ts: backend requests, upload flow, report issue and download.
+- src/services/backendAdapter.ts: converts server data into screen data while preserving uncertainty.
+- src/services/session.ts: development identity or Firebase token.
+- src/types/backend.generated.ts: generated server contract.
+- src/components/documents/: rendered-page viewer and manual type correction.
+- src/components/validation/: coverage and missing-document details.
+- src/pages/: shipment, review, report, document library, analytics, and settings screens.
+
+npm run build creates dist/. A web host must serve index.html for application routes such as /shipments/shp_123/results.

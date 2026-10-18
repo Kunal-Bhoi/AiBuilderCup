@@ -7,7 +7,7 @@ import { generateSampleDocument } from "./sampleDocuments";
 import { exportReport } from "@/lib/exportReport";
 import { sleep } from "@/lib/utils";
 
-const KEY = "tradeguard-demo-v2";
+const KEY = "tradeguard-demo-v3";
 interface Store { shipments: Shipment[]; results: Record<string, ValidationResults>; jobs: Record<string, number> }
 function read(): Store {
   const stored = localStorage.getItem(KEY);
@@ -45,7 +45,7 @@ function get(store: Store, id: string) {
   return shipment;
 }
 function editable(shipment: Shipment) {
-  if (!["draft", "failed"].includes(shipment.status)) throw new Error("Documents can only be changed in draft or failed shipments.");
+  if (!["draft", "uploading", "ready_for_review", "reviewed", "failed"].includes(shipment.status)) throw new Error("Documents can only be changed in draft or failed shipments.");
 }
 export const mockShipmentService = {
   async listShipments() { await sleep(150); return read().shipments; },
@@ -53,22 +53,26 @@ export const mockShipmentService = {
   async createShipment(payload: CreateShipmentPayload): Promise<Shipment> {
     await sleep(150);
     const store = read();
-    if (!payload.reference.trim() || !payload.originCountry || !payload.destinationCountry || payload.originCountry === payload.destinationCountry) throw new Error("Enter a reference and two different countries.");
+    if (!payload.reference.trim()) throw new Error("Enter a shipment reference.");
     if (store.shipments.some(shipment => shipment.reference.toLowerCase() === payload.reference.trim().toLowerCase())) throw new Error("This shipment reference already exists.");
-    const shipment: Shipment = { ...payload, reference: payload.reference.trim(), id: "shp-" + crypto.randomUUID(), status: "draft", documents: [], discrepancyCount: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: "sarah.chen@acmefreight.com" };
+    const shipment: Shipment = { ...payload, originCountry: "", destinationCountry: "", preferentialDutyClaim: false, reference: payload.reference.trim(), id: "shp-" + crypto.randomUUID(), status: "draft", documents: [], discrepancyCount: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: "sarah.chen@acmefreight.com" };
     store.shipments.unshift(shipment); save(store); return shipment;
   },
-  async uploadDocuments(id: string, files: File[]): Promise<ShipmentDocument[]> {
+  async uploadDocuments(id: string, files: File[], onProgress?: import("@/types").UploadProgress): Promise<ShipmentDocument[]> {
     editable(get(read(), id));
+    if (get(read(), id).documents.length + files.length > 20) throw new Error("A shipment can contain at most 20 documents.");
     const documents: ShipmentDocument[] = [];
     for (const file of files) {
-      if (!/\.(pdf|png|jpe?g|xlsx)$/i.test(file.name) || file.size === 0 || file.size > 20 * 1024 * 1024) throw new Error("Use a non-empty PDF, PNG, JPG, or XLSX file up to 20 MB.");
+      if (!/\.(pdf|png|jpe?g|xlsx|webp|tiff?|hei[cf])$/i.test(file.name) || file.size === 0 || file.size > 50 * 1024 * 1024) throw new Error("Use a non-empty PDF, PNG, JPG, or XLSX file up to 50 MB.");
       const document: ShipmentDocument = { id: "doc-" + crypto.randomUUID(), filename: file.name, type: "unknown", typeLabel: "Unclassified document", sizeBytes: file.size, uploadedAt: new Date().toISOString(), status: "uploaded" };
-      await fileOperation("put", document.id, file); documents.push(document);
+      await fileOperation("put", document.id, file); documents.push(document); onProgress?.(file, 100);
     }
     const store = read(); const shipment = get(store, id); editable(shipment);
     shipment.documents.push(...documents); shipment.updatedAt = new Date().toISOString(); save(store); return documents;
   },
+  async listDocuments() { return read().shipments.flatMap(shipment => shipment.documents.map(document => ({ ...document, shipment }))); },
+  async updateDocumentType(id: string, documentId: string, type: string) { const store = read(); const shipment = get(store, id); editable(shipment); const doc = shipment.documents.find(item => item.id === documentId); if (!doc) throw new Error("Document not found"); doc.type = type.toLowerCase() as ShipmentDocument["type"]; doc.typeLabel = type.toLowerCase().replace(/_/g, " "); save(store); return doc; },
+  async getDocumentPage(_id: string, _page: number): Promise<{ url: string }> { throw new Error("Use the demo PDF preview."); },
   async removeDocument(id: string, documentId: string) {
     const store = read(); const shipment = get(store, id); editable(shipment);
     await fileOperation("delete", documentId);
@@ -102,13 +106,16 @@ export const mockShipmentService = {
   async getValidationResults(id: string) { const store = read(); get(store, id); if (!store.results[id]) throw new Error("Results are available after validation completes."); return store.results[id]; },
   async reviewFinding(id: string, findingId: string, payload: ReviewFindingPayload) {
     const store = read(); const shipment = get(store, id);
-    if (shipment.status !== "ready_for_review") throw new Error("Only shipments awaiting review can be changed. Finalized reports are locked.");
-    if (!["confirm_issue", "override_finding", "request_correction"].includes(payload.decision)) throw new Error("Select a valid review decision.");
-    if (payload.decision === "override_finding" && (payload.reason?.trim().length ?? 0) < 10) throw new Error("Explain the override using at least 10 characters.");
+    if (!["ready_for_review", "reviewed"].includes(shipment.status)) throw new Error("Only shipments awaiting review can be changed. Finalized reports are locked.");
+    if (!["ACCEPT_SUGGESTION", "OVERRIDE", "FLAG_FOR_FOLLOW_UP", "DISMISS_AS_NOT_AN_ISSUE"].includes(payload.decision)) throw new Error("Select a valid review decision.");
+    if (["OVERRIDE", "DISMISS_AS_NOT_AN_ISSUE"].includes(payload.decision) && (payload.reason?.trim().length ?? 0) < 10) throw new Error("Explain the override using at least 10 characters.");
     const finding = store.results[id]?.findings.find(item => item.id === findingId);
     if (!finding) throw new Error("Finding not found.");
+    if (payload.expectedVersion !== undefined && payload.expectedVersion !== (finding.version ?? 1)) throw new Error("This finding has changed. Reload before reviewing it.");
+    if (payload.decision === "OVERRIDE" && !payload.chosenDocumentId && !payload.chosenValue?.trim()) throw new Error("Choose a document or value.");
+    finding.version = (finding.version ?? 1) + 1;
     finding.reviewStatus = "reviewed";
-    finding.reviewAction = { decision: payload.decision, reason: payload.reason?.trim(), reviewerId: "usr-current", reviewerName: "Sarah Chen", reviewedAt: new Date().toISOString() };
+    finding.reviewAction = { decision: payload.decision, chosenDocumentId: payload.chosenDocumentId, chosenValue: payload.chosenValue, reason: payload.reason?.trim(), reviewerId: "usr-current", reviewerName: "Sarah Chen", reviewedAt: new Date().toISOString() };
     shipment.updatedAt = new Date().toISOString(); save(store); return finding;
   },
   async finalizeReview(id: string) {

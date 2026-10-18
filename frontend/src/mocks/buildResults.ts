@@ -23,10 +23,13 @@ export function buildFixtureResults(shipment: Shipment): ValidationResults {
     result.findings.push({ id: `unverified-${field.fieldKey}`, fieldKey: field.fieldKey, label: field.label, severity: "medium", status: "cannot_verify", explanation: `${field.label} cannot be compared reliably: source values are missing or have insufficient evidence.`, suggestion: "Obtain a readable supporting document and verify this field with the shipper.", reviewStatus: "pending", affectedDocuments: [] });
   });
   result.findings.forEach(finding => {
+    finding.version = 1;
+    const suggested = result.matrix.find(field => field.fieldKey === finding.fieldKey)?.cells.find(cell => cell.rawValue);
+    finding.suggestedValue = suggested?.rawValue ?? null; finding.suggestedDocumentId = suggested?.documentId ?? null;
     finding.affectedDocuments = shipment.documents.map(document => document.id);
     if (shipment.status === "finalized") {
       finding.reviewStatus = "reviewed";
-      finding.reviewAction = { decision: "override_finding", reason: "Demo record: supporting evidence checked by the sample reviewer.", reviewerId: "usr-demo", reviewerName: "Marcus Weber", reviewedAt: shipment.finalizedAt! };
+      finding.reviewAction = { decision: "DISMISS_AS_NOT_AN_ISSUE", reason: "Demo record: supporting evidence checked by the sample reviewer.", reviewerId: "usr-demo", reviewerName: "Marcus Weber", reviewedAt: shipment.finalizedAt! };
     }
   });
   return result;

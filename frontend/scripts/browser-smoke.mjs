@@ -31,21 +31,21 @@ try {
   await page.screenshot({ path: output + "/review-desktop.png", fullPage: true });
   await page.goto(base + "/shipments/shp-001/report");
   await visible(page.getByRole("heading", { name: "Pre-Submission Validation Report", exact: true }));
-  await check(await page.getByRole("button", { name: "Finalise Review", exact: true }).isDisabled(), "pending findings block finalization");
+  await check(await page.getByRole("button", { name: "Issue Report", exact: true }).isDisabled(), "pending findings block finalization");
   await page.goto(base + "/shipments/shp-001/review?finding=find-001");
-  const findingCount = await page.evaluate(() => JSON.parse(localStorage.getItem("tradeguard-demo-v2")).results["shp-001"].findings.length);
+  const findingCount = await page.evaluate(() => JSON.parse(localStorage.getItem("tradeguard-demo-v3")).results["shp-001"].findings.length);
   for (let i = 0; i < findingCount; i++) {
     await page.getByRole("button", { name: "Review Finding", exact: true }).click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByRole("button", { name: "Confirm Issue", exact: false }).click();
+    await dialog.getByRole("button", { name: "Flag for follow-up", exact: false }).click();
     await dialog.getByRole("button", { name: "Submit Review", exact: true }).click();
     await dialog.waitFor({ state: "hidden" });
   }
   await page.getByRole("button", { name: "View Report" }).click();
-  await visible(page.getByRole("button", { name: "Finalise Review", exact: true }));
-  await page.getByRole("button", { name: "Finalise Review", exact: true }).click();
-  await page.getByRole("button", { name: "Confirm Finalise" }).click();
-  await visible(page.getByText("Report Finalised", { exact: true }));
+  await visible(page.getByRole("button", { name: "Issue Report", exact: true }));
+  await page.getByRole("button", { name: "Issue Report", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm issue" }).click();
+  await visible(page.getByText("Report Issued", { exact: true }));
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export PDF", exact: true }).click();
   await (await download).saveAs(output + "/sample-final-report.pdf");
@@ -53,8 +53,6 @@ try {
   await page.goto(base + "/shipments/new");
   await visible(page.getByLabel("Shipment reference"));
   await page.getByLabel("Shipment reference").fill("BROWSER-DEMO-001");
-  await page.getByLabel("Origin country").selectOption("China");
-  await page.getByLabel("Destination country").selectOption("United States");
   await page.getByRole("button", { name: "Continue to documents" }).click();
   await page.waitForURL("**/edit");
   const shipmentId = page.url().split("/").at(-2);

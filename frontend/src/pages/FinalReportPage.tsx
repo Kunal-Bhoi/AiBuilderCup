@@ -33,6 +33,8 @@ import { formatDate, formatDateTime } from "@/lib/utils"
 
 import { exportReport } from "@/lib/exportReport"
 import { shipmentService, USE_MOCK } from "@/services/shipmentService"
+import { canReview, getSession } from "@/services/session"
+import { CoverageDetails } from "@/components/validation/CoverageDetails"
 import { ErrorState } from "@/components/ui/error-state"
 
 // ─── Final Report Page ────────────────────────────────────────────────────────
@@ -98,7 +100,7 @@ export default function FinalReportPage() {
   }
 
   const isFinalized = report.status === "finalized"
-  const canFinalize = report.canFinalize && !isFinalized
+  const canFinalize = report.canFinalize && !isFinalized && canReview()
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in-up">
@@ -124,7 +126,7 @@ export default function FinalReportPage() {
           <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5">
             <Printer className="h-3.5 w-3.5" /> Print
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting || (!USE_MOCK && !isFinalized)} className="gap-1.5">
             {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
             Export PDF
           </Button>
@@ -134,10 +136,10 @@ export default function FinalReportPage() {
               onClick={() => setFinalizeDialog(true)}
               disabled={!canFinalize}
               className="gap-1.5"
-              title={!canFinalize ? `${report.pendingReviews} review(s) still pending` : undefined}
+              title={!canReview() ? "Only an approver or owner can issue a report" : !canFinalize ? `${report.pendingReviews} review(s) still pending` : undefined}
             >
               <Lock className="h-3.5 w-3.5" />
-              Finalise Review
+              Issue Report
             </Button>
           )}
         </div>
@@ -166,7 +168,7 @@ export default function FinalReportPage() {
         <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-4">
           <Shield className="h-5 w-5 text-green-600 shrink-0" />
           <div>
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">Report Finalised</p>
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">Report Issued</p>
             <p className="text-xs text-green-700 dark:text-green-300 mt-0.5">
               This validation report has been finalised on {formatDate(report.shipment.finalizedAt ?? "")}.
               It may now be used as a pre-submission audit record.
@@ -176,6 +178,9 @@ export default function FinalReportPage() {
       )}
 
       {actionError && <p role="alert" className="text-sm text-destructive">{actionError}</p>}
+      {!USE_MOCK && !isFinalized && <p className="rounded-lg border bg-muted/30 p-3 text-sm">This is a review preview. Issue the signed report after all findings have a decision to enable its PDF download.</p>}
+      {report.issuedReport && <Card><CardHeader><CardTitle className="text-sm">Server-issued report record</CardTitle></CardHeader><CardContent className="space-y-2 text-xs"><p>Report: {report.issuedReport.report_id}</p><p>Issued by: {report.issuedReport.issued_by}</p><p className="break-all">File fingerprint: {report.issuedReport.content_sha256}</p><p>The server records the signature for verifying this report.</p></CardContent></Card>}
+      <CoverageDetails coverage={report.results.coverage} />
       {/* Report Status Bar */}
       <Card>
         <CardContent className="p-5">
@@ -386,20 +391,19 @@ export default function FinalReportPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
-              Finalise Review
+              Issue Report
             </DialogTitle>
             <DialogDescription>
-              This will lock the validation report. No further changes can be made after finalisation.
+              The server will generate and sign the report, then lock further review changes.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg bg-muted/30 p-4 text-sm space-y-1">
             <p><strong>Shipment:</strong> {report.reference}</p>
             <p><strong>Findings reviewed:</strong> {report.results.findings.length}</p>
-            <p><strong>Account:</strong> Sarah Chen</p>
+            <p><strong>Account:</strong> {getSession().userId}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            By finalising, you confirm that all discrepancies have been reviewed and this document
-            is ready for pre-submission use.
+            Issuing the report records completion of human review. Follow-up decisions do not mean the underlying issue has been corrected.
           </p>
           {finalizeReview.error && <p role="alert" className="text-sm text-destructive">{finalizeReview.error.message}</p>}
           <DialogFooter>
@@ -408,7 +412,7 @@ export default function FinalReportPage() {
               {finalizeReview.isPending ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Finalising...</>
               ) : (
-                <><Lock className="h-4 w-4" /> Confirm Finalise</>
+                <><Lock className="h-4 w-4" /> Confirm issue</>
               )}
             </Button>
           </DialogFooter>

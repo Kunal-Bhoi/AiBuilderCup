@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, createBrowserRouter, useRouteError, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const CreateShipmentPage = lazy(() => import("@/pages/CreateShipmentPage"));
 const ProcessingPage = lazy(() => import("@/pages/ProcessingPage"));
@@ -27,7 +28,7 @@ export const router = createBrowserRouter([{
     { path: "shipments/:id/review", element: page(<DiscrepancyReviewPage />) },
     { path: "shipments/:id/report", element: page(<FinalReportPage />) },
     { path: "documents", element: page(<DocumentsPage />) },
-    { path: "analytics", element: page(<DashboardPage />) },
+    { path: "analytics", element: page(<AnalyticsPage />) },
     { path: "settings", element: page(<SettingsPage />) },
     { path: "help", element: page(<HelpPage />) },
     { path: "*", element: <div className="p-8"><h1 className="text-xl font-semibold">Page not found</h1><Link className="mt-4 block text-primary" to="/dashboard">Return to Dashboard</Link></div> },

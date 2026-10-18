@@ -4,11 +4,11 @@ import { Document, Page, pdfjs } from "react-pdf";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { shipmentService, USE_MOCK } from "@/services/shipmentService";
+import { realService, shipmentService, USE_MOCK } from "@/services/shipmentService";
 import type { SourceEvidence } from "@/types";
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-export function DocumentViewer({ documentId, filename, source }: { documentId: string; filename: string; source?: SourceEvidence | null }) {
+function LocalDocumentViewer({ documentId, filename, source }: { documentId: string; filename: string; source?: SourceEvidence | null }) {
   const { data: blob, error, isLoading, refetch } = useQuery({ queryKey: ["document-content", documentId], queryFn: () => shipmentService.getDocumentContent(documentId), staleTime: Infinity });
   const [url, setUrl] = useState("");
   const [page, setPage] = useState(source?.page ?? 1);
@@ -52,5 +52,28 @@ export function DocumentViewer({ documentId, filename, source }: { documentId: s
       <Button size="icon-sm" variant="ghost" aria-label="Next page" disabled={page >= pages} onClick={() => setPage(value => value + 1)}><ChevronRight /></Button>
     </div>
     {USE_MOCK && <p className="border-t p-2 text-[10px] text-muted-foreground">{isSample ? "Generated sample PDF. Highlight shows the predefined evidence location." : "Your original local file. Demo values are predefined and were not extracted from this file."}</p>}
+  </div>;
+}
+
+export function DocumentViewer(props: { documentId: string; filename: string; pageCount?: number; source?: SourceEvidence | null }) {
+  return USE_MOCK ? <LocalDocumentViewer {...props} /> : <BackendDocumentViewer key={props.documentId} {...props} />;
+}
+function BackendDocumentViewer({ documentId, filename, source, pageCount = 0 }: { documentId: string; filename: string; pageCount?: number; source?: SourceEvidence | null }) {
+  const [page, setPage] = useState(source?.pageKnown === false ? 1 : source?.page ?? 1);
+  const [zoom, setZoom] = useState(0.75);
+  const [imageError, setImageError] = useState(false);
+  const pages = Math.max(0, pageCount);
+  const { data, error, isLoading, refetch } = useQuery({ queryKey: ["document-page", documentId, page], queryFn: () => realService.getDocumentPage(documentId, page), enabled: pages > 0, staleTime: 60000, refetchInterval: query => query.state.data ? Math.max(1000, new Date(query.state.data.expires_at).getTime() - Date.now() - 30000) : false });
+  useEffect(() => { setPage(Math.min(Math.max(1, source?.pageKnown === false ? 1 : source?.page ?? 1), pages || 1)); }, [source?.page, source?.pageKnown, source?.excerpt, pages]);
+  useEffect(() => { setImageError(false); }, [data?.url]);
+  const box = source?.pageKnown !== false && source?.page === page ? source.bbox : null;
+  return <div className="flex h-full min-w-0 flex-col overflow-hidden rounded-lg border">
+    <div className="flex flex-wrap items-center gap-1 border-b p-2"><p className="min-w-0 flex-1 truncate text-xs font-medium" title={filename}>{filename}</p><Button size="icon-sm" variant="ghost" aria-label="Zoom out" onClick={() => setZoom(value => Math.max(0.35, value - 0.1))}><ZoomOut /></Button><span className="text-[10px]">{Math.round(zoom * 100)}%</span><Button size="icon-sm" variant="ghost" aria-label="Zoom in" onClick={() => setZoom(value => Math.min(2, value + 0.1))}><ZoomIn /></Button></div>
+    <div className="min-h-[320px] flex-1 overflow-auto bg-slate-100 p-3 dark:bg-slate-900">
+      {!pages && <p className="p-4 text-sm text-muted-foreground">Pages are not available yet. Start analysis to render this document. Failed or unreadable documents may have no preview.</p>}
+      {isLoading && <p className="text-sm">Loading page…</p>}
+      {(error || imageError) && <div role="alert" className="space-y-3 p-3 text-sm"><p>{error?.message ?? "The page link expired or could not be loaded."}</p><Button variant="outline" size="sm" onClick={() => { setImageError(false); refetch(); }}>Retry preview</Button></div>}
+      {data && <div className="relative mx-auto bg-white shadow-sm" style={{ width: 595 * zoom, aspectRatio: data.width_px + " / " + data.height_px }}><img src={data.url} alt={filename + " page " + page} className="block h-full w-full" onError={() => setImageError(true)} />{box && <div aria-label="Source evidence region" className="pointer-events-none absolute border-2 border-amber-500 bg-amber-300/25" style={{ left: box[0] * 100 + "%", top: box[1] * 100 + "%", width: box[2] * 100 + "%", height: box[3] * 100 + "%" }} />}</div>}
+    </div><div className="flex items-center justify-between border-t p-2"><Button size="icon-sm" variant="ghost" aria-label="Previous page" disabled={page <= 1} onClick={() => setPage(value => value - 1)}><ChevronLeft /></Button><span className="text-xs text-muted-foreground">{pages ? `Page ${page} of ${pages}` : "No rendered pages"}</span><Button size="icon-sm" variant="ghost" aria-label="Next page" disabled={page >= pages} onClick={() => setPage(value => value + 1)}><ChevronRight /></Button></div><p className="border-t p-2 text-[10px] text-muted-foreground">Server-rendered original page. Highlights use the recorded source region.</p>
   </div>;
 }

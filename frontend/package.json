@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
-    "test:browser": "node scripts/browser-smoke.mjs"
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "generate:api": "openapi-typescript ../contracts/openapi.yaml -o src/types/backend.generated.ts",
+    "check:api": "openapi-typescript ../contracts/openapi.yaml -o src/types/backend.generated.ts --check",
+    "test:browser:backend": "node scripts/backend-browser-smoke.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
@@ -59,12 +62,13 @@
     "eslint": "^9.11.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.12",
+    "openapi-typescript": "^7.13.0",
     "playwright": "^1.64.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.3",
     "vite": "^7.3.7",
-    "vitest": "^5.0.5",
-    "tailwindcss-animate": "^1.0.7"
+    "vitest": "^5.0.5"
   }
 }
