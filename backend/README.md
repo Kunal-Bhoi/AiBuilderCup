@@ -1,6 +1,6 @@
 # TradeCheck backend: api-service and worker-service
 
-FastAPI on Cloud Run. Implements the frozen contract in [BACKEND-SPEC.md](../BACKEND-SPEC.md) §5–7. The generated contract is in [contracts/openapi.yaml](../contracts/openapi.yaml).
+FastAPI on Cloud Run. The HTTP contract is in [contracts/openapi.yaml](../contracts/openapi.yaml).
 
 **The system never files anything.** It produces findings. A licensed human decides on each one, and every decision is written to a hash-chained audit trail. A signed report can only be issued once every finding has a decision.
 
@@ -20,9 +20,9 @@ The pipeline runs `INGEST → CLASSIFY → EXTRACT → RECONCILE → EXPLAIN →
 - Each delivery is idempotent (the `job_runs` idempotency key), so a duplicate delivery does nothing.
 - Partial success counts as success. A corrupt or password-protected file is recorded on that document, and the rest of the shipment is still checked.
 
-### Deviations from BACKEND-SPEC §9+ (the contract is unchanged)
+### Design choices
 
-| Spec | Here | Why |
+| Common choice | Here | Why |
 |---|---|---|
 | Memorystore Redis for SSE fan-out | Postgres `LISTEN/NOTIFY`, plus a `pipeline_events` table for `Last-Event-ID` replay | Needs no VPC and adds no cost. Events are delivered to every api instance when the transaction commits. |
 | PyMuPDF | pypdfium2 + pypdf | PyMuPDF is AGPL, and the contest licence grant rules out GPL/AGPL. |
@@ -48,25 +48,23 @@ uv run python scripts/smoke.py --scenario quantity_weight_conflict
 uv run pytest                              # 28 tests against real Postgres
 ```
 
-The defaults are all local modes: `AUTH_MODE=dev`, `AI_MODE=stub`, `TASKS_MODE=inline`, `STORAGE_MODE=local` and `SIGNING_MODE=local`. Production sets `firebase`, `http`, `cloudtasks`, `gcs` and `kms`. All settings are listed in [app/config.py](app/config.py).
+The defaults are all local modes: `AI_MODE=stub`, `TASKS_MODE=inline`, `STORAGE_MODE=local` and `SIGNING_MODE=local`. Production sets `vertex`, `cloudtasks`, `gcs` and `kms`. All settings are listed in [app/config.py](app/config.py).
 
 ## Deploy to GCP
 
 ```bash
 PROJECT=aibuildercup-512008 ./infra/setup.sh     # once: APIs, service accounts, bucket+CORS, Cloud SQL, Tasks queue, KMS key
 PROJECT=aibuildercup-512008 ./infra/deploy.sh    # worker → migrations job → api; prints the api URL
-# when the AI service and Firebase are ready:
-AI_MODE=http AI_SERVICE_URL=https://ai-service-....run.app AUTH_MODE=firebase \
-  ALLOWED_ORIGINS=https://<frontend-origin> PROJECT=aibuildercup-512008 ./infra/deploy.sh
+# deploy.sh defaults to AI_MODE=vertex; set ALLOWED_ORIGINS=https://<frontend-origin> once it is known
 ```
 
 Grant the worker's service account `roles/run.invoker` on ai-service. Set `API_MIN_INSTANCES=1` on judging day so the first request doesn't hit a cold start.
 
 ## Notes for the frontend
 
-- **Auth.** `AUTH_MODE=dev` needs no token. You can switch role with `X-Dev-Role: VIEWER|APPROVER|OWNER`. With Firebase, send `Authorization: Bearer <ID token>`. The `org_id` and `role` custom claims are set by `scripts/seed_org.py`.
+- **No login.** Every request acts as the workspace user with the APPROVER role. Send `X-Dev-Role: VIEWER|APPROVER|OWNER` to act as another role; the server enforces it (a VIEWER gets 403 on decisions and report issue).
 - **Uploads.** `POST /upload-urls`, then `PUT` each file to `signed_url` with the returned `headers`, then `POST /documents` with `{"upload_ids": [...]}`.
-- **SSE.** `GET /shipments/{id}/events` needs the Authorization header, which browser `EventSource` can't send. Use a fetch-based client such as `@microsoft/fetch-event-source`. It replays the current run's events on connect and honours `Last-Event-ID`. `GET /shipments/{id}` is the polling fallback.
+- **SSE.** `GET /shipments/{id}/events` streams progress; to send the role header, use a fetch-based client such as `@microsoft/fetch-event-source`. It replays the current run's events on connect and honours `Last-Event-ID`. `GET /shipments/{id}` is the polling fallback.
 - **Snippets.** `GET /documents/{id}/pages/{n}/crop?bbox=x0,y0,x1,y1` returns `image/png` and needs the token, so fetch it as a blob. `/image` returns JSON with a 5-minute signed URL.
 - **Discrepancies.** `GET /shipments/{id}/discrepancies` returns only open (undecided) findings. Add `?include_decided=true` for all of them.
 - **Health.** Use `/health`. Cloud Run's front end can intercept paths ending in `z`, so `/healthz` may not reach the app there.
@@ -85,9 +83,9 @@ Settings: `VERTEX_LOCATION` (default `global`), `GEMINI_MODEL` (default `gemini-
 
 ## Notes for an external AI service (`AI_MODE=http`)
 
-Only `/ai/v1/extract` is pinned by the spec. The classify, reconcile and explain shapes the backend sends and parses are drafts, defined in [app/schemas/ai.py](app/schemas/ai.py). Example request/response pairs are in [contracts/fixtures/ai/examples/](../contracts/fixtures/ai/examples/); regenerate them with `scripts/export_ai_fixtures.py`. Errors should use the §7 envelope, because the worker maps the `code` and `retryable` fields. [app/services/ai_stub.py](app/services/ai_stub.py) is a deterministic stand-in for the AI service:
+Only `/ai/v1/extract` is a frozen shape. The classify, reconcile and explain shapes the backend sends and parses are drafts, defined in [app/schemas/ai.py](app/schemas/ai.py). Example request/response pairs are in [contracts/fixtures/ai/examples/](../contracts/fixtures/ai/examples/); regenerate them with `scripts/export_ai_fixtures.py`. Errors should use the shared error envelope (`app/errors.py`), because the worker maps the `code` and `retryable` fields. [app/services/ai_stub.py](app/services/ai_stub.py) is a deterministic stand-in for the AI service:
 - extract: a text-layer parser.
-- reconcile: a faithful implementation of AI-SPEC §11.
+- reconcile: the deterministic rules in `app/services/rules.py`.
 - explain: a majority vote.
 
 It reports `model: "stub"` and makes no LLM calls.
@@ -99,5 +97,4 @@ It reports `model: "stub"` and makes no LLM calls.
 | `scripts/smoke.py` | Runs the end-to-end flow against any base URL. |
 | `scripts/export_openapi.py` | Regenerates `contracts/openapi.yaml`. |
 | `scripts/export_ai_fixtures.py` | Regenerates the AI contract examples. |
-| `scripts/seed_org.py` | Creates an org and sets a Firebase user's custom claims. |
 | `scripts/verify_report.py` | Verifies a report signature with only the public key, so a third party can run it. |

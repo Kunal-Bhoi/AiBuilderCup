@@ -1,4 +1,4 @@
-"""Versioned prompts (AI-SPEC §11.2). The version travels with every extracted field and every
+"""Versioned prompts. The version travels with every extracted field and every
 model_invocations row, so a finding can be traced to the exact prompt that produced it.
 
 Change a prompt's wording -> bump its version. A prompt change is a code change, and the

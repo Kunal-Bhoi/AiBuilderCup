@@ -1,4 +1,4 @@
-"""Runs one pipeline stage per task delivery (§11.2).
+"""Runs one pipeline stage per task delivery.
 
 Idempotency: INSERT ... ON CONFLICT DO NOTHING into job_runs keyed by
 sha256(shipment_id + stage + run_id). A duplicate delivery of a finished stage is

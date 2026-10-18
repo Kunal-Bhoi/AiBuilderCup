@@ -1,10 +1,10 @@
-"""EXTRACT: one AI call per document, concurrent under a semaphore of 4 (§11.2).
+"""EXTRACT: one AI call per document, concurrent under a semaphore of 4.
 
 Every applicable field gets a row, including ones the model did not return, because an
 omitted field is indistinguishable from a forgotten one (principle 2.2). Invented field keys
 and values for non-applicable fields are discarded. Partial success is a success.
 
-Extraction cache (§11.4): an identical file (same sha256) already extracted as the same
+Extraction cache: an identical file (same sha256) already extracted as the same
 document type in this org is copied instead of re-billed. The copied rows keep their
 original model, prompt version and timestamp, so the finding stays re-performable."""
 

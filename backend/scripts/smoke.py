@@ -1,7 +1,7 @@
 """End-to-end smoke test against a running api-service (local or Cloud Run).
 
     uv run python scripts/smoke.py --base http://localhost:8080 --scenario quantity_weight_conflict
-    uv run python scripts/smoke.py --base https://api-xxxx.a.run.app --token "$FIREBASE_ID_TOKEN"
+    uv run python scripts/smoke.py --base https://api-xxxx.a.run.app
 
 Creates a shipment, uploads a sample scenario through signed URLs, starts analysis, follows
 the SSE stream to completion, prints the matrix, decides every finding and issues the report."""
@@ -22,12 +22,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:8080")
     ap.add_argument("--scenario", default="quantity_weight_conflict")
-    ap.add_argument("--token")
     ap.add_argument("--no-decide", action="store_true")
     a = ap.parse_args()
 
-    headers = {"Authorization": f"Bearer {a.token}"} if a.token else {}
-    c = httpx.Client(base_url=f"{a.base.rstrip('/')}/api/v1", headers=headers, timeout=60)
+    c = httpx.Client(base_url=f"{a.base.rstrip('/')}/api/v1", timeout=60)
 
     def check(r: httpx.Response) -> dict:
         if r.status_code >= 300:

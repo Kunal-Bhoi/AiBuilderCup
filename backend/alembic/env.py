@@ -1,5 +1,5 @@
 """Async Alembic env. Uses the app engine so Cloud SQL and local DSNs both work.
-Migrations run as a Cloud Run Job before traffic shifts, never on app startup (§15)."""
+Migrations run as a Cloud Run Job before traffic shifts, never on app startup."""
 
 import asyncio
 

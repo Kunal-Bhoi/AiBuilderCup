@@ -1,4 +1,4 @@
-"""File handling for ingest (§11.3): magic-byte sniffing, conversion to PDF, page rendering.
+"""File handling for ingest: magic-byte sniffing, conversion to PDF, page rendering.
 
 Licensing: pypdfium2 (Apache-2.0/BSD), pypdf (BSD), Pillow (HPND), openpyxl (MIT),
 reportlab (BSD). PyMuPDF is deliberately not used because it is AGPL.
@@ -154,7 +154,7 @@ def _downscale(img: Image.Image, max_px: int) -> Image.Image:
 
 
 def ingest_bytes(blob: bytes, *, dpi: int, max_px: int, max_pages: int) -> IngestOutput:
-    """Validate, convert and render. Raises IngestFailure with a §7 code on a permanent failure.
+    """Validate, convert and render. Raises IngestFailure with an error code on a permanent failure.
     Synchronous and CPU-bound: call through asyncio.to_thread."""
     import pypdfium2 as pdfium
     from pypdf import PdfReader

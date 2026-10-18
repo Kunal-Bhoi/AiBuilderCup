@@ -17,7 +17,6 @@ dependencies = [
   "google-cloud-tasks>=2.16",
   "google-cloud-kms>=2.24",
   "cloud-sql-python-connector[asyncpg]>=1.11",
-  "firebase-admin>=6.5",
   "pypdfium2>=4.30",
   "pypdf>=4.3",
   "pillow>=10.4",

@@ -1,4 +1,4 @@
-"""Append-only, hash-chained audit trail (§10.1). The chain itself is computed by the
+"""Append-only, hash-chained audit trail. The chain itself is computed by the
 database trigger in alembic/versions/0002_audit_chain.py; this module writes events and
 verifies the chain with the same canonical expression."""
 

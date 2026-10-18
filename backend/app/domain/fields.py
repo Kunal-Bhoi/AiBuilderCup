@@ -1,4 +1,4 @@
-"""Canonical field catalogue (§4.2) and the applicability matrix (§4.5).
+"""Canonical field catalogue and the applicability matrix.
 
 The applicability matrix drives the difference between CANNOT_VERIFY and NOT_APPLICABLE,
 and it is what lets the UI honestly state what was not checked (principle 2.4)."""
@@ -68,7 +68,7 @@ FIELD_LABELS: dict[str, str] = {k: label for fields in FIELD_GROUPS.values() for
 FIELD_GROUP_OF: dict[str, str] = {k: g for g, fields in FIELD_GROUPS.items() for k, _ in fields}
 CANONICAL_FIELDS: list[str] = list(FIELD_LABELS.keys())
 
-# §4.5. Columns: INVOICE, PACKING, BL/AWB, COO, PO, DECL. "" = not applicable.
+# Applicability matrix. Columns: INVOICE, PACKING, BL/AWB, COO, PO, DECL. "" = not applicable.
 _COLS = [
     DocType.COMMERCIAL_INVOICE,
     DocType.PACKING_LIST,
@@ -117,7 +117,7 @@ for _field, _row in _MATRIX.items():
         _entry[DocType.AIR_WAYBILL.value] = _entry[DocType.BILL_OF_LADING.value]
     APPLICABILITY[_field] = _entry
 
-# Canonical fields with no row in §4.5 are not expected in any document type in v1.
+# Canonical fields with no row in the matrix are not expected in any document type in v1.
 for _field in CANONICAL_FIELDS:
     APPLICABILITY.setdefault(_field, {})
 

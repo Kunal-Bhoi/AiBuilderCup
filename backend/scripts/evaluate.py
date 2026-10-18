@@ -1,20 +1,22 @@
-"""Evaluation harness (AI-SPEC §15): run classify -> extract -> reconcile over labelled shipments
+"""Evaluation harness: run classify -> extract -> reconcile over labelled shipments
 and report what a panel will ask about. No database; the same AI client and rules as production.
 
     uv run python samples/generate.py
     AI_MODE=stub   uv run python scripts/evaluate.py                    # harness sanity check
     AI_MODE=vertex GCP_PROJECT=aibuildercup-512008 uv run python scripts/evaluate.py
+    ... --extra eval/simulated_photos/clean_fcl --extra eval/simulated_photos/quantity_weight_conflict
     ... --extra eval/photographed                                       # real photos, reported separately
 
 Ground truth for the generated scenarios comes from samples/generate.py itself. Expected verdicts
 are what the deterministic reconciler returns on the TRUE values, so a verdict error is always an
 extraction or classification error, never a rules disagreement.
 
-An --extra directory holds real scans or photos plus a labels.json:
-    {"shipment": "photographed_bl",
+An --extra directory holds images plus a labels.json ("split" defaults to "photographed";
+scripts/simulate_photos.py writes "simulated_photo"):
+    {"shipment": "photographed_bl", "split": "photographed",
      "documents": {"bl_photo.jpg": {"doc_type": "BILL_OF_LADING", "fields": {"gross_weight": "520 kg", ...}}}}
 
-Reported separately, never blended (§15.2):
+Each split (synthetic PDFs, simulated photos, real photos) is reported separately, never blended:
   false agreement  labelled DISAGREE, reported AGREE / AGREE_AT_HS_ROOT / TOLERANCE_MATCH  (dangerous)
   false alarm      labelled agree, reported DISAGREE                                        (costs 30 s)
 Writes eval/out/<timestamp>-<mode>.jsonl and .md."""
@@ -83,7 +85,7 @@ def extra_shipments(folder: Path) -> list[dict]:
     labels = json.loads((folder / "labels.json").read_text())
     files = [{"path": folder / fn, "doc_type": d["doc_type"], "fields": d["fields"], "lines": {}}
              for fn, d in labels["documents"].items()]
-    return [{"name": labels.get("shipment", folder.name), "split": "photographed", "files": files}]
+    return [{"name": labels.get("shipment", folder.name), "split": labels.get("split", "photographed"), "files": files}]
 
 
 def _norm(key: str, raw: str | None) -> str | None:
@@ -162,7 +164,7 @@ async def run_shipment(sh: dict, client) -> dict:
 
 def summarise(records: list[dict], mode: str, model: str) -> str:
     lines = [f"# Evaluation: AI_MODE={mode}, model {model}", "", f"Run {datetime.now(UTC).isoformat(timespec='seconds')}.", ""]
-    for split in ("synthetic", "photographed"):
+    for split in ("synthetic", "simulated_photo", "photographed"):
         rs = [r for r in records if r["split"] == split]
         if not rs:
             continue
@@ -184,7 +186,7 @@ def summarise(records: list[dict], mode: str, model: str) -> str:
         pct = lambda n, d: f"{100 * n / d:.1f}% ({n}/{d})" if d else "n/a"  # noqa: E731
         cost = sum(r["cost_usd"] for r in rs)
         lines += [
-            f"## {split.title()} ({len(rs)} shipments)", "",
+            f"## {split.replace('_', ' ').title()} ({len(rs)} shipments)", "",
             "| Metric | Value |", "|---|---|",
             f"| Document type accuracy | {pct(type_ok, len(docs))} |",
             f"| Field extraction exact (normalised) | {pct(correct, len(fields))} |",

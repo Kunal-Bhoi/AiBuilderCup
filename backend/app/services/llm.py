@@ -1,11 +1,11 @@
 """Gemini on Vertex AI: the single place for model ids, API surface, retries, error mapping and
-token accounting (AI-SPEC §9, §12, §16). Nothing else in the codebase talks to a model.
+token accounting. Nothing else in the codebase talks to a model.
 
 API surface. The Interactions API is the current one (`generateContent` is marked Legacy), and
 google-genai routes it to Vertex at projects/{project}/locations/{location}. GEMINI_API switches
 to `generate_content` without changing any caller, should a model or region not serve it yet.
 
-Model rules that cost marks or correctness if ignored (AI-SPEC §12.1):
+Model rules that cost marks or correctness if ignored:
   - temperature is never set (Gemini 3 degrades below 1.0); determinism comes from the
     response schema and the deterministic reconciler, not from sampling
   - thinking_level only, never together with a thinking budget (the API returns 400)
@@ -13,7 +13,7 @@ Model rules that cost marks or correctness if ignored (AI-SPEC §12.1):
     schema translated to JSON Schema for Interactions; callers validate with Pydantic after
   - store=False: trade documents are commercially sensitive and are not kept server-side
 
-Retries: 3 attempts with exponential backoff and jitter on 429/5xx/timeouts, then the §7 code is
+Retries: 3 attempts with exponential backoff and jitter on 429/5xx/timeouts, then the error code is
 raised so the worker can choose between a Cloud Tasks retry and a recorded permanent failure.
 A reply that is not valid JSON for the schema gets one repair attempt with the error appended."""
 
@@ -174,7 +174,7 @@ async def _call_generate_content(model: str, system: str, parts: list[Part], sch
 
 
 def map_error(exc: BaseException) -> AppError:
-    """SDK, HTTP and timeout failures -> the shared §7 taxonomy."""
+    """SDK, HTTP and timeout failures -> the shared error taxonomy."""
     if isinstance(exc, AppError):
         return exc
     if isinstance(exc, (TimeoutError, httpx.TimeoutException)) or "timeout" in type(exc).__name__.lower():
@@ -225,14 +225,14 @@ async def generate_json(*, stage: str, model: str, prompt_version: str, system: 
             result = parse(json.loads(reply.text))
         except (ValueError, ValidationError) as exc:
             if repair == 0:
-                # One repair attempt with the error appended (AI-SPEC §16), then give up.
+                # One repair attempt with the error appended, then give up.
                 attempt_parts = [*parts, Text(f"Your previous reply was not valid for the required schema "
                                               f"({type(exc).__name__}: {str(exc)[:400]}). Reply again with only "
                                               f"JSON that matches the schema exactly.")]
                 continue
             _log(stage, model, prompt_version, tokens_in, tokens_out, started, "MALFORMED")
             # from None: a ValidationError's text quotes the model output, i.e. document values, which must
-            # never reach a log through the exception chain (§14).
+            # never reach a log through the exception chain.
             raise AppError(ErrorCode.MODEL_MALFORMED_OUTPUT, "The model returned output that does not match the schema.") from None
         usage = ai.Usage(input_tokens=tokens_in, output_tokens=tokens_out, model=model, model_version=model_version,
                          prompt_version=prompt_version, latency_ms=int((time.monotonic() - started) * 1000))
@@ -242,7 +242,7 @@ async def generate_json(*, stage: str, model: str, prompt_version: str, system: 
 
 
 def _log(stage: str, model: str, prompt_version: str, tokens_in: int, tokens_out: int, started: float, outcome: str) -> None:
-    # Counts and versions only: never prompts, values or filenames (§14).
+    # Counts and versions only: never prompts, values or filenames.
     log.info("model_call", extra={"stage": stage, "model": model, "prompt_version": prompt_version, "api": get_settings().gemini_api,
                                   "input_tokens": tokens_in, "output_tokens": tokens_out, "outcome": outcome,
                                   "latency_ms": int((time.monotonic() - started) * 1000)})

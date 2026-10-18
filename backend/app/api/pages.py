@@ -1,7 +1,7 @@
-"""Page renders and provenance snippets (§5.1, FRONTEND-SPEC §11.4).
+"""Page renders and provenance snippets.
 
-/image returns JSON with a 5-minute signed URL. /crop returns image/png directly; it needs the
-Bearer token, so the frontend fetches it as a blob. Pages were rendered once at ingest."""
+/image returns JSON with a 5-minute signed URL. /crop returns image/png directly; the frontend
+fetches it as a blob. Pages were rendered once at ingest."""
 
 import asyncio
 from collections import OrderedDict

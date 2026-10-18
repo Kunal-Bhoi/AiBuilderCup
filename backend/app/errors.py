@@ -1,4 +1,4 @@
-"""Shared error taxonomy (§7). Every error leaving this service uses one envelope."""
+"""Shared error taxonomy. Every error leaving this service uses one envelope."""
 
 from enum import StrEnum
 from typing import Any

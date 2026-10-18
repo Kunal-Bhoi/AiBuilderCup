@@ -1,4 +1,4 @@
-"""Stage dispatch. One Cloud Task per stage (§11.2), pushed to worker-service with an OIDC
+"""Stage dispatch. One Cloud Task per stage, pushed to worker-service with an OIDC
 token. Locally: `inline` runs the stage as an asyncio task in-process (development only;
 Cloud Run may stop an instance after the response, so production never does this) and
 `sync` awaits it (tests)."""

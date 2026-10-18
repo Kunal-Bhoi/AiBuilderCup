@@ -1,4 +1,4 @@
-"""Audit hash chain and append-only enforcement (§10.1).
+"""Audit hash chain and append-only enforcement.
 
 hash = SHA256(prev_hash || canonical_json(payload) || occurred_at || event_type),
 prev_hash = hash of the previous row for the same org, computed under a per-org

@@ -1,4 +1,4 @@
-"""CLASSIFY: identify document types, detect duplicates and missing required types (AI-SPEC §14).
+"""CLASSIFY: identify document types, detect duplicates and missing required types.
 Only documents without a type are sent to the model, so re-running after a user corrects
 one type does not re-bill the others. User-set types are never overwritten."""
 

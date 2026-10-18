@@ -121,7 +121,7 @@ try {
   await visible(page.getByText("Report Issued", { exact: true }));
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "Export PDF", exact: true }).click(); await (await download).saveAs("artifacts/backend-issued-report.pdf");
   assert.equal(issued.length, 1); pass("report is issued once and PDF downloads through the returned storage link");
-  await page.goto(base + "/settings"); await page.getByLabel("Development role").selectOption("VIEWER"); await page.getByRole("button", { name: "Save session" }).click(); await page.waitForURL("**/dashboard");
+  await page.goto(base + "/settings"); await page.getByLabel("Review role").selectOption("VIEWER"); await page.getByRole("button", { name: "Apply role" }).click(); await page.waitForURL("**/dashboard");
   await page.goto(base + "/shipments/shp_contract/review"); await visible(page.getByRole("button", { name: "Re-review", exact: true })); assert.equal(await page.getByRole("button", { name: "Re-review", exact: true }).isDisabled(), true); pass("viewer controls cannot record review decisions");
   await page.goto(base + "/analytics"); await page.getByRole("button", { name: "Verify audit history" }).click(); await visible(page.getByText(/History verified/)); pass("backend review analytics and audit verification work");
   await page.goto(base + "/documents"); await visible(page.getByText("invoice.pdf", { exact: true }));

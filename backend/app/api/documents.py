@@ -1,4 +1,4 @@
-"""Uploads and documents (§5.1, §5.2, §13.4).
+"""Uploads and documents.
 
 Files go straight from the browser to Cloud Storage with a 15-minute signed PUT URL; the API
 never proxies document bytes. Registration then checks the object really exists, enforces

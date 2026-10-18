@@ -1,4 +1,4 @@
-"""Shipment status machine (§5.4). A report can only be issued from REVIEWED,
+"""Shipment status machine. A report can only be issued from REVIEWED,
 which is principle 2.1 (the system never files) expressed as a state machine."""
 
 from app.domain.enums import ShipmentStatus as S

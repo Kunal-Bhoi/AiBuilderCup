@@ -1,10 +1,10 @@
 """Pipeline progress events: persisted to pipeline_events and fanned out with Postgres
-LISTEN/NOTIFY. This replaces the spec's Memorystore Redis pub/sub.
+LISTEN/NOTIFY. No Redis or other broker is needed.
 
 Why it is correct across Cloud Run instances: the worker writes the event row and calls
 pg_notify inside one transaction, so the notification is delivered on commit to every
 api instance holding a LISTEN connection, and the row is there for Last-Event-ID replay.
-SSE is an optimisation, never the source of truth (§5.3)."""
+SSE is an optimisation, never the source of truth."""
 
 import asyncio
 import json

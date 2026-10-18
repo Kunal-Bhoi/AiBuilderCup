@@ -1,4 +1,4 @@
-"""INGEST (§11.3): validate, convert, render pages to PNG once, store them, keep the text layer.
+"""INGEST: validate, convert, render pages to PNG once, store them, keep the text layer.
 Pages are rendered once at ingest and reused by every later run and every snippet request."""
 
 import asyncio

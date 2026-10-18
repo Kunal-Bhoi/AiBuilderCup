@@ -10,6 +10,7 @@ from app.api import analysis, decisions, documents, org, pages, reports, shipmen
 from app.config import get_settings
 from app.db.engine import dispose
 from app.errors import install_error_handlers
+from app.frontend import mount_frontend
 from app.ids import new_id
 from app.logging import configure_logging, set_request_context
 from app.services.events import broker
@@ -76,6 +77,8 @@ def create_app() -> FastAPI:
         from app.worker.routes import router as worker_router
 
         app.include_router(worker_router)
+    if s.service_role in ("api", "all"):
+        mount_frontend(app, s.static_dir)  # last: the SPA fallback must not shadow any route above
     return app
 
 

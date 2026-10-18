@@ -1,8 +1,8 @@
-"""Client for ai-service (§6). Service-to-service with a Google-signed OIDC ID token whose
+"""Client for ai-service. Service-to-service with a Google-signed OIDC ID token whose
 audience is pinned to the ai-service URL. No user token ever reaches the AI service.
 
 Retry: 3 attempts with exponential backoff and jitter on retryable errors (429/5xx/timeouts),
-then the §7 code is raised so the worker can decide between a Cloud Tasks retry and a
+then the error code is raised so the worker can decide between a Cloud Tasks retry and a
 recorded permanent failure."""
 
 import asyncio

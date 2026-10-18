@@ -3,9 +3,9 @@ and the HTTP client, so no stage, table, endpoint or screen changes with the mod
 
   classify   Gemini, page 1 + text excerpt, one call per document (cheap model tier)
   extract    Gemini, one call per document, every page as a separately labelled image so the
-             page index is known by construction (AI-SPEC §11.1), boxes converted once here
+             page index is known by construction, boxes converted once here
   reconcile  NO model: app/services/rules.py (principle 2.6, the comparison is code)
-  explain    Gemini, only the conflicting values and agreed related fields (§14)
+  explain    Gemini, only the conflicting values and agreed related fields
 """
 
 import asyncio
@@ -101,7 +101,7 @@ def explain_schema(document_ids: list[str]) -> dict:
 def to_canonical_bbox(box_2d: list[float] | None) -> list[float] | None:
     """Gemini [ymin, xmin, ymax, xmax] on 0..1000  ->  canonical [x0, y0, x1, y1] on 0..1.
 
-    Y FIRST on the way in, X FIRST on the way out (AI-SPEC Appendix C). This is the only place
+    Y FIRST on the way in, X FIRST on the way out. This is the only place
     in the system that knows the model's native format. Out-of-range values are clamped, never
     dropped; a box with no area is reported as no box."""
     if not box_2d or len(box_2d) != 4:
@@ -133,7 +133,7 @@ def text_layer_agreement(text_index: str | None, raw_text: str | None, value: st
 
 
 def blended_confidence(self_report: float, text_agrees: bool | None, format_ok: bool) -> float:
-    """AI-SPEC §11.3: a self-reported confidence correlates poorly with correctness, so combine it
+    """A self-reported confidence correlates poorly with correctness, so combine it
     with two cheap, independent signals. A value missing from an existing text layer is a strong
     hallucination signal. The weights are a starting point to be calibrated by scripts/evaluate.py."""
     sr = max(0.0, min(1.0, float(self_report)))

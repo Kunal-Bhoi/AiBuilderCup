@@ -1,5 +1,5 @@
-"""Human decisions (§5.2). The approver is always the authenticated user; there is no code path
-that lets a client say who approved something. Optimistic concurrency on discrepancies.version."""
+"""Human decisions. The approver recorded is always the request's principal (app/auth.py); no
+request body field can say who approved something. Optimistic concurrency on discrepancies.version."""
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select, update

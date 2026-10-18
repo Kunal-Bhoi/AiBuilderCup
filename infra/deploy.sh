@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Deploy worker-service and api-service from source (Cloud Build + Google Cloud buildpacks;
-# no Dockerfile, no local Docker), then run migrations as a Cloud Run Job.
+# Build the frontend, then deploy worker-service and api-service from source (Cloud Build +
+# Google Cloud buildpacks; no Dockerfile, no local Docker) and run migrations as a Cloud Run Job.
+# api-service also serves the built frontend, so the whole app is one public URL with no login.
+# Requires: gcloud logged in, Node.js/npm (frontend build), and infra/setup.sh run once.
 #
 #   PROJECT=aibuildercup-512008 ./infra/deploy.sh
 #   GEMINI_MODEL=... VERTEX_LOCATION=... PROJECT=aibuildercup-512008 ./infra/deploy.sh
@@ -19,11 +21,11 @@ VERTEX_LOCATION="${VERTEX_LOCATION:-global}"
 GEMINI_MODEL="${GEMINI_MODEL:-gemini-3.8-flash}"
 GEMINI_MODEL_CLASSIFY="${GEMINI_MODEL_CLASSIFY:-}"
 GEMINI_API="${GEMINI_API:-interactions}"      # or generate_content
-AUTH_MODE="${AUTH_MODE:-dev}"
 ORIGINS="${ALLOWED_ORIGINS:-*}"
 API_MIN_INSTANCES="${API_MIN_INSTANCES:-0}"   # set to 1 on judging day
 
 SRC="$(cd "$(dirname "$0")/../backend" && pwd)"
+FRONTEND="$(cd "$(dirname "$0")/../frontend" && pwd)"
 API_SA="api-sa@$PROJECT.iam.gserviceaccount.com"
 WORKER_SA="worker-sa@$PROJECT.iam.gserviceaccount.com"
 CONN="$PROJECT:$REGION:$SQL_INSTANCE"
@@ -33,10 +35,15 @@ gc() { gcloud --project "$PROJECT" "$@"; }
 common_env() {
   echo "^;^ENVIRONMENT=prod;GCP_PROJECT=$PROJECT;GCP_REGION=$REGION;GCS_BUCKET=$BUCKET;STORAGE_MODE=gcs;\
 CLOUD_SQL_INSTANCE=$CONN;DB_USER=tradecheck;DB_NAME=tradecheck;TASKS_MODE=cloudtasks;TASKS_QUEUE=$QUEUE;\
-TASKS_SERVICE_ACCOUNT=$WORKER_SA;AI_MODE=$AI_MODE;AI_SERVICE_URL=$AI_SERVICE_URL;AUTH_MODE=$AUTH_MODE;\
+TASKS_SERVICE_ACCOUNT=$WORKER_SA;AI_MODE=$AI_MODE;AI_SERVICE_URL=$AI_SERVICE_URL;\
 VERTEX_LOCATION=$VERTEX_LOCATION;GEMINI_MODEL=$GEMINI_MODEL;GEMINI_MODEL_CLASSIFY=$GEMINI_MODEL_CLASSIFY;GEMINI_API=$GEMINI_API;\
-FIREBASE_PROJECT=$PROJECT;SIGNING_MODE=kms;KMS_KEY_VERSION=$KMS_VERSION;ALLOWED_ORIGINS=$ORIGINS;$1"
+SIGNING_MODE=kms;KMS_KEY_VERSION=$KMS_VERSION;ALLOWED_ORIGINS=$ORIGINS;$1"
 }
+
+echo "== frontend build (served by api-service from backend/static, same origin as /api/v1)"
+(cd "$FRONTEND" && npm ci --no-audit --no-fund && VITE_USE_MOCK=false VITE_API_BASE_URL=/api/v1 npm run build)
+rm -rf "$SRC/static"
+cp -R "$FRONTEND/dist" "$SRC/static"
 
 echo "== worker-service (internal ingress, invoked only by Cloud Tasks as worker-sa)"
 gc run deploy worker-service --source "$SRC" --region "$REGION" --service-account "$WORKER_SA" \
@@ -60,7 +67,7 @@ gc run jobs deploy tradecheck-migrate --image "$IMAGE" --region "$REGION" --serv
   --command python --args=-m,alembic,upgrade,head --max-retries 0 -q
 gc run jobs execute tradecheck-migrate --region "$REGION" --wait -q
 
-echo "== api-service (public; the app enforces Firebase auth)"
+echo "== api-service (public, no login)"
 gc run deploy api-service --image "$IMAGE" --region "$REGION" --service-account "$API_SA" \
   --allow-unauthenticated --cpu 1 --memory 512Mi --concurrency 80 --timeout 900 \
   --min-instances "$API_MIN_INSTANCES" --max-instances 10 \
@@ -70,5 +77,5 @@ API_URL="$(gc run services describe api-service --region "$REGION" --format 'val
 gc run services update api-service --region "$REGION" --update-env-vars "PUBLIC_BASE_URL=$API_URL" -q >/dev/null
 
 echo
-echo "api-service:    $API_URL   (docs: $API_URL/docs, health: $API_URL/health)"
+echo "app:            $API_URL   (frontend; API at $API_URL/api/v1, docs $API_URL/docs, health $API_URL/health)"
 echo "worker-service: $WORKER_URL (internal)"

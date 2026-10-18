@@ -1,5 +1,5 @@
 """AI_MODE=vertex without GCP: the model call is replaced by a fake, everything around it is real.
-Covers the bbox conversion (AI-SPEC Appendix C), confidence blending, the response mapping, the
+Covers the bbox conversion (Gemini's native box format), confidence blending, the response mapping, the
 explainer's id guard, classification fallbacks, error mapping and schema translation."""
 
 import asyncio
@@ -47,7 +47,7 @@ def test_bbox_edge_cases(box, expected):
     assert to_canonical_bbox(box) == expected
 
 
-# ---------------------------------------------------------------- confidence (AI-SPEC §11.3)
+# ---------------------------------------------------------------- confidence
 
 def test_value_missing_from_the_text_layer_drops_below_the_floor():
     assert blended_confidence(0.95, True, True) > 0.9

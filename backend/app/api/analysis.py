@@ -1,4 +1,4 @@
-"""Analysis: start the pipeline, stream progress, and read results (§5.1, §5.3)."""
+"""Analysis: start the pipeline, stream progress, and read results."""
 
 import asyncio
 import json

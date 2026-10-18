@@ -1,4 +1,4 @@
-"""In-process stand-in for ai-service (AI_MODE=stub, §8).
+"""In-process stand-in for ai-service (AI_MODE=stub).
 
 It is deliberately honest about being a stub: model name "stub", no LLM, no vision.
   classify   title / filename keywords

@@ -1,4 +1,4 @@
-"""Deterministic normalisation and reconciliation (AI-SPEC §13, principle 2.6).
+"""Deterministic normalisation and reconciliation (principle 2.6).
 
 The comparison is code, not a model: whether two HS codes share a heading is a fact about the
 Harmonised System, and whether 48250.00 equals 48,250.00 is arithmetic. Both AI modes use this
@@ -136,7 +136,7 @@ _MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun",
 
 
 def _norm_date(t: str) -> str | None:
-    """ISO date, or 'AMBIGUOUS:<a>|<b>' when DD/MM vs MM/DD cannot be settled (AI-SPEC §11.6)."""
+    """ISO date, or 'AMBIGUOUS:<a>|<b>' when DD/MM vs MM/DD cannot be settled."""
     m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", t)
     if m:
         return date(int(m[1]), int(m[2]), int(m[3])).isoformat()
@@ -156,7 +156,7 @@ def _norm_date(t: str) -> str | None:
     return None
 
 
-# ---------------------------------------------------------------- reconcile (AI-SPEC §11)
+# ---------------------------------------------------------------- reconcile
 
 TOLERANCE = {
     "invoice_total": (Decimal("0.005"), Decimal("1.00")),

@@ -4,7 +4,7 @@
 
 Each document is a one-page A4 PDF with a real text layer: a title line, then "Label: value"
 lines on an 18pt grid starting 72pt from the top. app/services/ai_stub.py relies on that
-layout for its approximate bounding boxes. The scenarios mirror the shared fixture set (§8.1)."""
+layout for its approximate bounding boxes. The scenarios mirror the shared fixture set."""
 
 import copy
 import io

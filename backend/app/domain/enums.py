@@ -1,4 +1,4 @@
-"""Canonical wire vocabulary (§4). These exact strings travel on the wire. Do not invent variants."""
+"""Canonical wire vocabulary. These exact strings travel on the wire. Do not invent variants."""
 
 from enum import StrEnum
 

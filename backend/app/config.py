@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     environment: str = "local"
     public_base_url: str = "http://localhost:8080"
     allowed_origins: str = "*"
+    static_dir: str = "static"  # built frontend served by api-service when present (app/frontend.py)
 
     # Database. Either a plain DSN (local) or a Cloud SQL instance connection name (prod).
     database_url: str = "postgresql+asyncpg://tradecheck:tradecheck@localhost:5432/tradecheck"
@@ -23,7 +24,6 @@ class Settings(BaseSettings):
     db_name: str = "tradecheck"
 
     # Modes
-    auth_mode: Literal["firebase", "dev"] = "dev"
     ai_mode: Literal["vertex", "http", "stub"] = "stub"
     tasks_mode: Literal["cloudtasks", "inline", "sync"] = "inline"
     storage_mode: Literal["gcs", "local"] = "local"
@@ -37,7 +37,6 @@ class Settings(BaseSettings):
     worker_url: str | None = None
     tasks_service_account: str | None = None
     kms_key_version: str | None = None
-    firebase_project: str | None = None
 
     # AI service
     ai_service_url: str | None = None
@@ -58,7 +57,7 @@ class Settings(BaseSettings):
     local_signing_key: str = ".local/signing_key.pem"
     local_url_secret: str = "dev-only-secret-change-me"
 
-    # Pipeline knobs (§11, §12.4, §13.4)
+    # Pipeline knobs
     render_dpi: int = 200
     render_max_px: int = 2048
     max_file_bytes: int = 50 * 1024 * 1024

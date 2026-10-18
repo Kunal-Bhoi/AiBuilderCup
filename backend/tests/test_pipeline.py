@@ -1,4 +1,4 @@
-"""End-to-end pipeline over the shared fixture scenarios (§8.1), with the AI stub."""
+"""End-to-end pipeline over the shared fixture scenarios, with the AI stub."""
 
 from conftest import analyze, upload_scenario, verdicts
 

@@ -16,7 +16,6 @@ os.environ.update({
                                    "postgresql+asyncpg://tradecheck:tradecheck@localhost:5432/tradecheck_test"),
     "TASKS_MODE": "sync",
     "AI_MODE": "stub",
-    "AUTH_MODE": "dev",
     "STORAGE_MODE": "local",
     "SIGNING_MODE": "local",
     "SERVICE_ROLE": "all",

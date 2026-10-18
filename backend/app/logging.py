@@ -1,6 +1,6 @@
 """Structured JSON logging to stdout (Cloud Logging picks it up as jsonPayload).
 
-Never log field values or filenames: they are commercially sensitive (§14).
+Never log field values or filenames: they are commercially sensitive.
 Log keys, counts, ids and stages only."""
 
 import contextvars

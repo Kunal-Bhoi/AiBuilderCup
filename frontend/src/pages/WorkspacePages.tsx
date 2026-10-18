@@ -10,8 +10,8 @@ import { DocumentViewer } from "@/components/documents/DocumentViewer";
 import { ErrorState } from "@/components/ui/error-state";
 import { USE_MOCK } from "@/services/shipmentService";
 import { mockShipmentService } from "@/services/mockShipmentService";
-import { API_BASE_URL, AUTH_MODE } from "@/services/config";
-import { getSession, saveSession } from "@/services/session";
+import { API_BASE_URL } from "@/services/config";
+import { getSession, saveRole, type Role } from "@/services/session";
 import { apiClient } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import { canEditDocuments } from "@/lib/workflow";
@@ -27,14 +27,14 @@ export function DocumentsPage() {
 export function SettingsPage() {
   const session = getSession();
   const [confirm, setConfirm] = useState(false);
-  const [userId, setUserId] = useState(session.userId), [orgId, setOrgId] = useState(session.orgId);
-  const [role, setRole] = useState(session.role), [token, setToken] = useState(session.token);
+  const [role, setRole] = useState<Role>(session.role);
   const health = useQuery({ queryKey: ["backend-health"], queryFn: async () => (await apiClient.get<{ status: string }>("/health")).data, enabled: !USE_MOCK, retry: false });
   return <div className="mx-auto max-w-3xl p-6 space-y-6"><h1 className="text-2xl font-semibold">Settings</h1>
     <Card><CardHeader><CardTitle>Workspace connection</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><p>Mode: <strong>{USE_MOCK ? "Local demo" : "Backend connection"}</strong></p><p className="break-all">API address: {API_BASE_URL}</p>{!USE_MOCK && <div><p role="status">Server: {health.isLoading ? "Checking…" : health.error ? "Unavailable" : health.data?.status}</p>{health.error && <p className="text-xs text-destructive">{health.error.message}</p>}<Button size="sm" variant="outline" className="mt-2" onClick={() => health.refetch()}>Check connection</Button></div>}<p className="text-muted-foreground">Use the moon or sun button in the header to change the theme.</p></CardContent></Card>
-    {!USE_MOCK && <Card><CardHeader><CardTitle>{AUTH_MODE === "dev" ? "Local development account" : "Firebase session"}</CardTitle></CardHeader><CardContent><form className="space-y-4" onSubmit={event => { event.preventDefault(); saveSession({ userId, orgId, role }, token); window.location.assign("/dashboard"); }}>
-      {AUTH_MODE === "dev" ? <><p className="text-xs text-muted-foreground">These headers match the backend's development sign-in mode. The server must also be running with AUTH_MODE=dev.</p><div><label htmlFor="dev-user" className="text-sm font-medium">User ID</label><Input id="dev-user" value={userId} onChange={e => setUserId(e.target.value)} required /></div><div><label htmlFor="dev-org" className="text-sm font-medium">Organisation ID</label><Input id="dev-org" value={orgId} onChange={e => setOrgId(e.target.value)} required /></div><div><label htmlFor="dev-role" className="text-sm font-medium">Development role</label><select id="dev-role" value={role} onChange={e => setRole(e.target.value as typeof role)} className="ml-3 h-9 rounded border bg-background px-2"><option>VIEWER</option><option>APPROVER</option><option>OWNER</option></select></div></> : <><p className="text-xs text-muted-foreground">Use an ID token from your existing Firebase sign-in provider. The backend verifies the user, organisation, and role. Tokens stay in this browser tab and need replacement when they expire.</p><label htmlFor="firebase-token" className="text-sm font-medium">Firebase ID token</label><Input type="password" id="firebase-token" value={token} onChange={e => setToken(e.target.value)} autoComplete="off" /><p className="text-xs text-muted-foreground">Current account: {session.userId} · {session.role}</p></>}
-      <div className="flex gap-2"><Button type="submit">Save session</Button>{AUTH_MODE !== "dev" && <Button type="button" variant="outline" onClick={() => { saveSession({ userId: "", orgId: "", role: "VIEWER" }, ""); window.location.assign("/dashboard"); }}>Clear session</Button>}</div>
+    {!USE_MOCK && <Card><CardHeader><CardTitle>Review role</CardTitle></CardHeader><CardContent><form className="space-y-4" onSubmit={event => { event.preventDefault(); saveRole(role); window.location.assign("/dashboard"); }}>
+      <p className="text-xs text-muted-foreground">No sign-in is needed. Choose the role to work as: approvers and owners record decisions and issue reports; viewers can only read. The server enforces the role.</p>
+      <div><label htmlFor="review-role" className="text-sm font-medium">Review role</label><select id="review-role" value={role} onChange={e => setRole(e.target.value as Role)} className="ml-3 h-9 rounded border bg-background px-2"><option>VIEWER</option><option>APPROVER</option><option>OWNER</option></select></div>
+      <Button type="submit">Apply role</Button>
     </form></CardContent></Card>}
     {USE_MOCK && <Card><CardHeader><CardTitle>Demo data</CardTitle></CardHeader><CardContent><p className="mb-3 text-sm text-muted-foreground">Demo records are local to this browser. They are not sent to the backend.</p><Button variant="destructive" onClick={() => setConfirm(true)}>Reset demo shipments</Button></CardContent></Card>}
     <Dialog open={confirm} onOpenChange={setConfirm}><DialogContent><DialogHeader><DialogTitle>Reset demo shipments?</DialogTitle><DialogDescription>This restores sample shipment records and review decisions. Stored local file contents remain in this browser.</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={() => setConfirm(false)}>Cancel</Button><Button variant="destructive" onClick={() => mockShipmentService.resetStore()}>Reset demo</Button></DialogFooter></DialogContent></Dialog>

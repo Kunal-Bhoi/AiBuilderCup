@@ -1,7 +1,7 @@
 """Org-scoped loaders and serializers shared by the API routers.
 
 Every loader takes the principal's org_id and filters on it. A row in another org is
-reported exactly like a missing row, so a shared link never leaks existence (§13.1)."""
+reported exactly like a missing row, so a shared link never leaks existence."""
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession

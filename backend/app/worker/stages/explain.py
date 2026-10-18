@@ -1,4 +1,4 @@
-"""EXPLAIN: one call per disagreement, concurrent, best-effort, capped per shipment (AI-SPEC §12.4, §13).
+"""EXPLAIN: one call per disagreement, concurrent, best-effort, capped per shipment.
 
 If an explain call fails the discrepancy still exists, marked UNAVAILABLE. The finding is the
 product; the explanation is an aid. This stage never fails the pipeline."""

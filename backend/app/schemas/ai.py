@@ -1,6 +1,6 @@
-"""Backend <-> ai-service payloads (§6).
+"""Backend <-> ai-service payloads.
 
-/ai/v1/extract is pinned by the spec. classify, reconcile and explain are DRAFT shapes the
+/ai/v1/extract is the agreed, frozen shape. classify, reconcile and explain are DRAFT shapes the
 backend proposes; they are mirrored in contracts/fixtures/ai/ and must be confirmed with the
 AI developer. Models are permissive on input (extra="ignore") so additive changes on the AI
 side do not break the worker."""
@@ -78,7 +78,7 @@ class ClassifyResponse(_M):
     usage: Usage | None = None
 
 
-# ---- extract (frozen, §6) ----
+# ---- extract (frozen) ----
 class ExtractOptions(_M):
     confidence_floor: float = 0.55
     max_pages: int = 15

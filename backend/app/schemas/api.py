@@ -1,4 +1,4 @@
-"""Frontend <-> backend payloads (§5). The generated contracts/openapi.yaml comes from these,
+"""Frontend <-> backend payloads. The generated contracts/openapi.yaml comes from these,
 so the contract cannot drift from the code."""
 
 from datetime import datetime

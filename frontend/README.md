@@ -43,15 +43,12 @@ Copy .env.example to .env only if you need to override settings.
 | VITE_USE_MOCK | false connects to the backend; true runs the standalone demo |
 | VITE_API_BASE_URL | /api/v1 locally, or the full backend address ending in /api/v1 |
 | VITE_PROXY_TARGET | Backend address for the development proxy; defaults to http://localhost:8080 |
-| VITE_AUTH_MODE | dev for the local development account; firebase for Firebase ID tokens |
 
 Restart Vite after changing environment variables.
 
-In development mode, Settings controls X-Dev-User, X-Dev-Org, and X-Dev-Role. These match the backend's documented local mode. The server still enforces all role restrictions.
+There is no sign-in. The app is usable immediately as the workspace user. Settings has a **Review role** choice (Approver, Owner or Viewer) that is sent to the server as `X-Dev-Role`; the server enforces it, so a viewer cannot record decisions or issue reports.
 
-For a backend using Firebase, set VITE_AUTH_MODE=firebase. Settings accepts an ID token from your existing Firebase sign-in provider; it does not create accounts or implement a separate login provider. Tokens stay in sessionStorage, the current browser tab's session store, and need replacing when expired. The backend verifies the token and authorises every request. Viewer controls cannot issue reports or save review decisions.
-
-The frontend never forwards authentication headers to temporary file-storage links.
+The frontend never forwards its identity headers to temporary file-storage links.
 
 For a production build, configure VITE_API_BASE_URL to the deployed backend, or configure the web host to forward /api to it. Vite's development proxy is not included in production builds. The backend and storage service must allow the frontend's browser origin. All VITE_ variables are public; they must contain no secret model or service keys.
 
@@ -105,7 +102,7 @@ For the standalone demo walkthrough, start a demo server and run npm run test:br
 
 - src/services/shipmentService.ts: backend requests, upload flow, report issue and download.
 - src/services/backendAdapter.ts: converts server data into screen data while preserving uncertainty.
-- src/services/session.ts: development identity or Firebase token.
+- src/services/session.ts: workspace identity and the selected review role (no sign-in).
 - src/types/backend.generated.ts: generated server contract.
 - src/components/documents/: rendered-page viewer and manual type correction.
 - src/components/validation/: coverage and missing-document details.

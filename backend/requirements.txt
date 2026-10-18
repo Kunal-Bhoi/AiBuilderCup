@@ -24,8 +24,6 @@ asyncpg==0.32.0
     #   tradecheck-backend
 attrs==26.1.0
     # via aiohttp
-cachecontrol==0.14.4
-    # via firebase-admin
 certifi==2026.7.22
     # via
     #   httpcore
@@ -45,7 +43,6 @@ cryptography==50.0.2
     # via
     #   cloud-sql-python-connector
     #   google-auth
-    #   pyjwt
     #   tradecheck-backend
 distro==1.9.0
     # via google-genai
@@ -55,17 +52,13 @@ et-xmlfile==2.0.0
     # via openpyxl
 fastapi==0.143.3
     # via tradecheck-backend
-firebase-admin==7.7.0
-    # via tradecheck-backend
 frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
 google-api-core==2.42.0
     # via
-    #   firebase-admin
     #   google-cloud-core
-    #   google-cloud-firestore
     #   google-cloud-kms
     #   google-cloud-sql
     #   google-cloud-storage
@@ -75,7 +68,6 @@ google-auth==2.62.0
     #   cloud-sql-python-connector
     #   google-api-core
     #   google-cloud-core
-    #   google-cloud-firestore
     #   google-cloud-kms
     #   google-cloud-sql
     #   google-cloud-storage
@@ -83,19 +75,13 @@ google-auth==2.62.0
     #   google-genai
     #   tradecheck-backend
 google-cloud-core==2.8.0
-    # via
-    #   google-cloud-firestore
-    #   google-cloud-storage
-google-cloud-firestore==2.34.1 ; platform_python_implementation != 'PyPy'
-    # via firebase-admin
+    # via google-cloud-storage
 google-cloud-kms==3.18.0
     # via tradecheck-backend
 google-cloud-sql==0.1.1
     # via cloud-sql-python-connector
 google-cloud-storage==3.17.1
-    # via
-    #   firebase-admin
-    #   tradecheck-backend
+    # via tradecheck-backend
 google-cloud-tasks==2.26.0
     # via tradecheck-backend
 google-crc32c==1.9.0
@@ -120,7 +106,6 @@ grpc-google-iam-v1==0.14.5
 grpcio==1.84.0
     # via
     #   google-api-core
-    #   google-cloud-firestore
     #   google-cloud-kms
     #   google-cloud-sql
     #   google-cloud-tasks
@@ -133,21 +118,14 @@ h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
-h2==4.4.1
-    # via httpx
-hpack==4.2.0
-    # via h2
 httpcore==1.0.9
     # via httpx
 httptools==0.9.0
     # via uvicorn
 httpx==0.28.1
     # via
-    #   firebase-admin
     #   google-genai
     #   tradecheck-backend
-hyperframe==6.1.0
-    # via h2
 idna==3.20
     # via
     #   anyio
@@ -158,8 +136,6 @@ mako==1.4.3
     # via alembic
 markupsafe==3.0.4
     # via mako
-msgpack==1.2.3
-    # via cachecontrol
 multidict==7.1.0
     # via
     #   aiohttp
@@ -184,14 +160,12 @@ propcache==0.5.4
 proto-plus==1.29.0
     # via
     #   google-api-core
-    #   google-cloud-firestore
     #   google-cloud-kms
     #   google-cloud-sql
     #   google-cloud-tasks
 protobuf==7.36.2
     # via
     #   google-api-core
-    #   google-cloud-firestore
     #   google-cloud-kms
     #   google-cloud-sql
     #   google-cloud-tasks
@@ -215,8 +189,6 @@ pydantic-core==2.50.1
     # via pydantic
 pydantic-settings==2.16.0
     # via tradecheck-backend
-pyjwt==2.15.1
-    # via firebase-admin
 pypdf==6.21.1
     # via tradecheck-backend
 pypdfium2==5.14.0
@@ -231,7 +203,6 @@ reportlab==5.0.1
     # via tradecheck-backend
 requests==2.34.2
     # via
-    #   cachecontrol
     #   cloud-sql-python-connector
     #   google-api-core
     #   google-auth

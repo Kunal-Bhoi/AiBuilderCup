@@ -1,4 +1,4 @@
-"""Shipments: create, keyset-paginated list, detail, soft delete (§5.1)."""
+"""Shipments: create, keyset-paginated list, detail, soft delete."""
 
 import base64
 from datetime import UTC, datetime

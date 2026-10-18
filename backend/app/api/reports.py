@@ -1,4 +1,4 @@
-"""Signed pre-submission report (§5.1). Only issuable from REVIEWED: every discrepancy has a
+"""Signed pre-submission report. Only issuable from REVIEWED: every discrepancy has a
 human decision before the report exists (principle 2.1 as a state machine)."""
 
 import base64

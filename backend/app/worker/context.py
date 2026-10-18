@@ -81,7 +81,7 @@ class StageContext:
         ))
 
     async def budget_exhausted(self, session: AsyncSession) -> bool:
-        """True once this run's recorded model tokens reach TOKEN_BUDGET_PER_RUN (AI-SPEC §12.3).
+        """True once this run's recorded model tokens reach TOKEN_BUDGET_PER_RUN.
         Checked before each billable call; calls already in flight finish, so it is a soft ceiling."""
         run = await session.get(AnalysisRun, self.run_id)
         if run is None:

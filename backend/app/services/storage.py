@@ -1,7 +1,7 @@
 """Object storage. GCS with v4 signed URLs in production; a local directory with
 HMAC-signed URLs (served by app/api/local_storage.py) for development.
 
-Signed URLs: 15 minutes for upload, 5 minutes for read, minted per request, never stored (§13.3)."""
+Signed URLs: 15 minutes for upload, 5 minutes for read, minted per request, never stored."""
 
 import asyncio
 import hashlib

@@ -1,6 +1,6 @@
-"""SQLAlchemy models for the §10 schema.
+"""SQLAlchemy models for the database schema.
 
-Additions beyond §10, all internal (none appear on the wire as new contract):
+Additions beyond the core tables, all internal (none appear on the wire as new contract):
   uploads           pending signed-URL uploads before registration
   analysis_runs     one row per pipeline run: stage, missing documents, verdict counts
   pipeline_events   SSE event log, replayed on reconnect (replaces Redis, see README)
@@ -50,7 +50,7 @@ class Organisation(Base):
 
 class User(Base):
     __tablename__ = "users"
-    id: Mapped[str] = mapped_column(Text, primary_key=True)  # Firebase UID
+    id: Mapped[str] = mapped_column(Text, primary_key=True)  # workspace user id
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)  # stored lower-cased
     display_name: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = _now()
